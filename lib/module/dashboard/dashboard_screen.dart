@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/common/constants/app_colours.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:app/module/dashboard/dashboard_binding.dart';
 // import 'package:app/module/dashboard/widgets/dashboard_card.dart'; // Unused in new design
 // import 'package:app/module/dashboard/widgets/profile_card.dart'; // Unused in new design
@@ -11,6 +12,9 @@ import '../recommended_matches/recommended_matches_screen.dart';
 import '../recommended_matches/recommended_matches_binding.dart';
 import '../profile/profile_detail_screen.dart';
 import '../profile/profile_detail_binding.dart';
+import '../social/social_binding.dart';
+import '../social/shortlisted_profiles_screen.dart';
+import '../social/interests_received_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -27,26 +31,35 @@ class DashboardState extends State<DashboardScreen> {
         backgroundColor: const Color(0xFFF5F5F5), // Light grey background
         body: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildModernHeader(context),
-                const SizedBox(height: 30),
-                _buildStatsGrid(),
-                const SizedBox(height: 25),
-                _buildSectionHeader("Recommended Matches", () {
-                  Get.to(const RecommendedMatchesScreen(),
-                      binding: RecommendedMatchesBinding());
-                }),
-                _buildProfileList(),
-                const SizedBox(height: 20),
-                _buildSectionHeader("New Profiles", () {}),
-                _buildProfileList(),
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(
+                  child: CircularProgressIndicator(
+                      color: AppColors.theameColorRed));
+            }
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModernHeader(context, controller),
+                  const SizedBox(height: 20),
+                  _buildBannerCarousel(controller),
+                  const SizedBox(height: 30),
+                  _buildStatsGrid(controller),
+                  const SizedBox(height: 25),
+                  _buildSectionHeader("Recommended Matches", () {
+                    Get.to(const RecommendedMatchesScreen(),
+                        binding: RecommendedMatchesBinding());
+                  }),
+                  _buildProfileList(controller.recommendedUsers),
+                  const SizedBox(height: 20),
+                  _buildSectionHeader("New Profiles", () {}),
+                  _buildProfileList(controller.newUsers),
+                  const SizedBox(height: 30),
+                ],
+              ),
+            );
+          }),
         ),
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(
@@ -91,12 +104,77 @@ class DashboardState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildModernHeader(BuildContext context) {
+  Widget _buildBannerCarousel(DashboardController controller) {
+    if (controller.banners.isEmpty) {
+      // Mock banners if none from API
+      return CarouselSlider(
+        options: CarouselOptions(
+          height: 150.0,
+          enlargeCenterPage: true,
+          autoPlay: true,
+          aspectRatio: 16 / 9,
+          autoPlayCurve: Curves.fastOutSlowIn,
+          enableInfiniteScroll: true,
+          autoPlayAnimationDuration: const Duration(milliseconds: 800),
+          viewportFraction: 0.85,
+        ),
+        items: [
+          _buildBannerItem(
+              "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"),
+          _buildBannerItem(
+              "https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?q=80&w=2070&auto=format&fit=crop"),
+        ],
+      );
+    }
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 150.0,
+        enlargeCenterPage: true,
+        autoPlay: true,
+        viewportFraction: 0.85,
+      ),
+      items: controller.banners.map((banner) {
+        return _buildBannerItem(banner['imageUrl']);
+      }).toList(),
+    );
+  }
+
+  Widget _buildBannerItem(String imageUrl) {
+    return Container(
+      margin: const EdgeInsets.all(5.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15.0),
+        image: DecorationImage(
+          image: NetworkImage(imageUrl),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15.0),
+          gradient: LinearGradient(
+            colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernHeader(
+      BuildContext context, DashboardController controller) {
+    String name = controller.userData['firstName'] ?? "User";
+    String profileId =
+        controller.userData['id']?.toString().substring(0, 8) ?? "MM123456";
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
-          height: 250, // Increased height for membership plan
+          height:
+              180, // Reduced height since membership strip is moved to settings
           decoration: const BoxDecoration(
             color: AppColors.theameColorRed,
             borderRadius: BorderRadius.only(
@@ -158,20 +236,20 @@ class DashboardState extends State<DashboardScreen> {
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              "Rushikesh", // Removed "Namaste, "
-                              style: TextStyle(
+                              name,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18, // Smaller size
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Rubik-bold',
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
-                              "ID: 8769876", // Profile ID
-                              style: TextStyle(
+                              "ID: $profileId",
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 13,
                                 fontFamily: 'Rubik-normal',
@@ -193,86 +271,7 @@ class DashboardState extends State<DashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Membership Plan Option - Premium Look
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFDC830), Color(0xFFF37335)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            shape: BoxShape.circle),
-                        child: const Icon(Icons.workspace_premium,
-                            color: Color(0xFFF37335), size: 20),
-                      ),
-                      const SizedBox(width: 15),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "Upgrade to Premium",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                fontFamily: 'Rubik-bold',
-                                shadows: [
-                                  Shadow(
-                                    offset: Offset(0, 1),
-                                    blurRadius: 2,
-                                    color: Colors.black12,
-                                  )
-                                ]),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            "Get unlimited access & more",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'Rubik-normal',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "View Plans",
-                          style: TextStyle(
-                            color: Color(0xFFF37335),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -315,30 +314,32 @@ class DashboardState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatsGrid() {
+  Widget _buildStatsGrid(DashboardController controller) {
     // A clean grid of stats (Matches, Interests, etc.)
+    final statsData = controller.userStats;
+
     final List<Map<String, dynamic>> stats = [
       {
         'title': 'Matches',
-        'count': '50+',
+        'count': statsData['matches']?.toString() ?? '0',
         'icon': CupertinoIcons.person_2_fill,
         'color': Colors.blueAccent
       },
       {
         'title': 'Interests',
-        'count': '12',
+        'count': statsData['interests']?.toString() ?? '0',
         'icon': CupertinoIcons.heart_fill,
         'color': AppColors.theameColorRed
       },
       {
         'title': 'Shortlisted',
-        'count': '8',
+        'count': statsData['shortlisted']?.toString() ?? '0',
         'icon': CupertinoIcons.star_fill,
         'color': Colors.orangeAccent
       },
       {
         'title': 'Visitors',
-        'count': '24',
+        'count': statsData['visitors']?.toString() ?? '0',
         'icon': CupertinoIcons.eye_fill,
         'color': Colors.green
       },
@@ -357,39 +358,62 @@ class DashboardState extends State<DashboardScreen> {
         ),
         itemCount: stats.length,
         itemBuilder: (context, index) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(stats[index]['icon'],
-                    color: stats[index]['color'], size: 28),
-                const SizedBox(height: 8),
-                Text(
-                  stats[index]['count'],
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Rubik-bold',
-                    color: Colors.black87,
+          return GestureDetector(
+            onTap: () {
+              switch (index) {
+                case 0:
+                  Get.to(const RecommendedMatchesScreen(),
+                      binding: RecommendedMatchesBinding());
+                  break;
+                case 1:
+                  Get.to(const InterestsReceivedScreen(),
+                      binding: SocialBinding());
+                  break;
+                case 2:
+                  Get.to(const ShortlistedProfilesScreen(),
+                      binding: SocialBinding());
+                  break;
+                case 3:
+                  // Visitors - maybe just refresh or toast
+                  break;
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 4,
+                      offset: Offset(0, 2))
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(stats[index]['icon'],
+                      color: stats[index]['color'], size: 28),
+                  const SizedBox(height: 8),
+                  Text(
+                    stats[index]['count'],
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Rubik-bold',
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                Text(
-                  stats[index]['title'],
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontFamily: 'Rubik-normal',
+                  Text(
+                    stats[index]['title'],
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontFamily: 'Rubik-normal',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -428,24 +452,39 @@ class DashboardState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildProfileList() {
+  Widget _buildProfileList(List<dynamic> users) {
+    if (users.isEmpty) {
+      return const SizedBox(
+        height: 250,
+        child: Center(child: Text("No profiles found")),
+      );
+    }
     return SizedBox(
       height: 250,
       child: ListView.builder(
         padding: const EdgeInsets.only(left: 16, right: 16),
         scrollDirection: Axis.horizontal,
-        itemCount: 5,
+        itemCount: users.length,
         itemBuilder: (context, index) {
-          return _buildPremiumProfileCard();
+          return _buildPremiumProfileCard(users[index]);
         },
       ),
     );
   }
 
-  Widget _buildPremiumProfileCard() {
+  Widget _buildPremiumProfileCard(dynamic user) {
+    String name = user['name'] ?? "${user['firstName']} ${user['lastName']}";
+    String age = user['age']?.toString() ?? "N/A";
+    String height = user['physicalAttributes']?['height'] ?? "N/A";
+    String occupation = user['educationDetails']?['occupationType'] ?? "N/A";
+    String photoUrl = (user['photos'] != null && user['photos'].isNotEmpty)
+        ? user['photos'][0]['url']
+        : "";
+
     return GestureDetector(
         onTap: () {
-          Get.to(const ProfileDetailScreen(), binding: ProfileDetailBinding());
+          Get.to(const ProfileDetailScreen(),
+              binding: ProfileDetailBinding(), arguments: user['_id']);
         },
         child: Container(
           width: 170,
@@ -472,25 +511,31 @@ class DashboardState extends State<DashboardScreen> {
                     color: Colors.grey[200],
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(15)),
+                    image: photoUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(photoUrl), fit: BoxFit.cover)
+                        : null,
                   ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Icon(Icons.person,
-                            size: 50, color: Colors.grey[400]),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: CircleAvatar(
-                          radius: 14,
-                          backgroundColor: Colors.white.withOpacity(0.8),
-                          child: const Icon(CupertinoIcons.heart,
-                              size: 16, color: Colors.grey),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: photoUrl.isEmpty
+                      ? Stack(
+                          children: [
+                            Center(
+                              child: Icon(Icons.person,
+                                  size: 50, color: Colors.grey[400]),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: CircleAvatar(
+                                radius: 14,
+                                backgroundColor: Colors.white.withOpacity(0.8),
+                                child: const Icon(CupertinoIcons.heart,
+                                    size: 16, color: Colors.grey),
+                              ),
+                            ),
+                          ],
+                        )
+                      : null,
                 ),
               ),
               Expanded(
@@ -501,11 +546,11 @@ class DashboardState extends State<DashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Priya Sharma",
+                      Text(
+                        name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Rubik-bold',
@@ -513,12 +558,12 @@ class DashboardState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "24 Yrs, 5'6\"",
+                        "$age Yrs, $height",
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        "Software Engineer",
+                        occupation,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.grey[600], fontSize: 11),

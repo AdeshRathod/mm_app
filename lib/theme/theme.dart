@@ -113,7 +113,7 @@ final ThemeData lightTheme = ThemeData(
     ),
   ),
 
-  tabBarTheme: TabBarTheme(
+  tabBarTheme: TabBarThemeData(
     overlayColor: WidgetStateProperty.all(Colors.transparent),
     indicatorColor: Colors.transparent,
     indicator: const BoxDecoration(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/common/constants/app_colours.dart';
 import 'package:app/module/dashboard/dashboard_screen.dart';
-import 'package:app/module/settings/settings_binding.dart';
+import 'package:app/module/settings/settings_controller.dart';
 import 'package:app/module/settings/widgets/setting_menu_card.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -85,7 +85,15 @@ class SettingsScreenState extends State<SettingsScreen> {
                       thickness: 0.2,
                     ),
                   ),
-                  SettingMenuCard("Privacy Policy", 8)
+                  SettingMenuCard("Privacy Policy", 8),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
+                    child: Divider(
+                      color: Colors.black,
+                      thickness: 0.2,
+                    ),
+                  ),
+                  SettingMenuCard("Logout", 9)
                 ],
               ),
             ),

@@ -9,53 +9,77 @@ class ProfileDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ProfileDetailController>(
-      builder: (controller) => Scaffold(
-        backgroundColor: Colors.white,
-        body: CustomScrollView(
-          slivers: [
-            _buildSliverAppBar(context, controller),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildBasicInfoSection(),
-                      const SizedBox(height: 20),
-                      _buildActionButtons(controller),
-                      const SizedBox(height: 25),
-                      const Divider(thickness: 8, color: Color(0xFFF5F5F5)),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle("Physical Attributes"),
-                      _buildPhysicalAttributes(),
-                      const Divider(),
-                      _buildSectionTitle("Education & Career"),
-                      _buildEducationCareer(),
-                      const Divider(),
-                      _buildSectionTitle("Family Background"),
-                      _buildFamilyBackground(),
-                      const Divider(),
-                      _buildSectionTitle("Horoscope Details"),
-                      _buildHoroscopeDetails(),
-                      const Divider(),
-                      _buildSectionTitle("Lifestyle & Hobbies"),
-                      _buildLifestyle(),
-                      const SizedBox(height: 80), // Space for bottom bar
-                    ],
+    return GetX<ProfileDetailController>(
+      builder: (controller) {
+        if (controller.isLoading.value) {
+          return const Scaffold(
+            body: Center(
+                child:
+                    CircularProgressIndicator(color: AppColors.theameColorRed)),
+          );
+        }
+
+        var user = controller.userData;
+        if (user.isEmpty) {
+          return const Scaffold(
+            body: Center(child: Text("Profile not found")),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context, controller),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildBasicInfoSection(user),
+                        const SizedBox(height: 20),
+                        _buildActionButtons(controller),
+                        const SizedBox(height: 25),
+                        const Divider(thickness: 8, color: Color(0xFFF5F5F5)),
+                        const SizedBox(height: 20),
+                        _buildSectionTitle("Physical Attributes"),
+                        _buildPhysicalAttributes(user),
+                        const Divider(),
+                        _buildSectionTitle("Education & Career"),
+                        _buildEducationCareer(user),
+                        const Divider(),
+                        _buildSectionTitle("Family Background"),
+                        _buildFamilyBackground(user),
+                        const Divider(),
+                        _buildSectionTitle("Horoscope Details"),
+                        _buildHoroscopeDetails(user),
+                        const Divider(),
+                        _buildSectionTitle("Lifestyle & Hobbies"),
+                        _buildLifestyle(user),
+                        const SizedBox(height: 80), // Space for bottom bar
+                      ],
+                    ),
                   ),
-                ),
-              ]),
-            ),
-          ],
-        ),
-        bottomNavigationBar: _buildBottomAction(controller),
-      ),
+                ]),
+              ),
+            ],
+          ),
+          bottomNavigationBar: _buildBottomAction(controller),
+        );
+      },
     );
   }
 
   Widget _buildSliverAppBar(
       BuildContext context, ProfileDetailController controller) {
+    var user = controller.userData;
+    String name = user['name'] ?? "${user['firstName']} ${user['lastName']}";
+    String profileId = user['_id']?.toString().substring(0, 8) ?? "N/A";
+    String photoUrl = (user['photos'] != null && user['photos'].isNotEmpty)
+        ? user['photos'][0]['url']
+        : "";
+
     return SliverAppBar(
       expandedHeight: 400.0,
       pinned: true,
@@ -64,10 +88,12 @@ class ProfileDetailScreen extends StatelessWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Profile Image Placeholder
+            // Profile Image
             Container(
               color: Colors.grey[300],
-              child: const Icon(Icons.person, size: 100, color: Colors.grey),
+              child: photoUrl.isNotEmpty
+                  ? Image.network(photoUrl, fit: BoxFit.cover)
+                  : const Icon(Icons.person, size: 100, color: Colors.grey),
             ),
             // Gradient Overlay
             Container(
@@ -88,9 +114,9 @@ class ProfileDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Priya Sharma",
-                    style: TextStyle(
+                  Text(
+                    name,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -107,9 +133,9 @@ class ProfileDetailScreen extends StatelessWidget {
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: Colors.white54)),
-                        child: const Text(
-                          "ID: MM8769876",
-                          style: TextStyle(
+                        child: Text(
+                          "ID: MM$profileId",
+                          style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold),
@@ -117,7 +143,7 @@ class ProfileDetailScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       const Text(
-                        "Last Online: 2h ago",
+                        "Last Online: Recently",
                         style: TextStyle(
                             color: Colors.greenAccent,
                             fontSize: 12,
@@ -144,13 +170,18 @@ class ProfileDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBasicInfoSection() {
+  Widget _buildBasicInfoSection(Map<dynamic, dynamic> user) {
+    String age = user['age']?.toString() ?? "N/A";
+    String birthdate = user['birthdate'] ?? "N/A";
+    String maritalStatus = user['basicDetails']?['maritalStatus'] ?? "N/A";
+    String city = user['basicDetails']?['city'] ?? "N/A";
+
     return Column(
       children: [
-        _buildInfoRow(Icons.calendar_today, "26 Oct 1996 (27 Yrs)"),
-        _buildInfoRow(CupertinoIcons.person_3_fill, "Never Married"),
+        _buildInfoRow(Icons.calendar_today, "$birthdate ($age Yrs)"),
+        _buildInfoRow(CupertinoIcons.person_3_fill, maritalStatus),
         _buildInfoRow(Icons.temple_hindu, "Hindu, Maratha"),
-        _buildInfoRow(Icons.location_on, "Pune, Maharashtra"),
+        _buildInfoRow(Icons.location_on, city),
         _buildInfoRow(Icons.language, "Mother Tongue: Marathi"),
       ],
     );
@@ -285,64 +316,69 @@ class ProfileDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPhysicalAttributes() {
+  Widget _buildPhysicalAttributes(Map<dynamic, dynamic> user) {
+    var phys = user['physicalAttributes'] ?? {};
     return Column(
       children: [
-        _buildGridItem("Height", "5' 6\""),
-        _buildGridItem("Weight", "55 kg"),
-        _buildGridItem("Blood Group", "B+"),
-        _buildGridItem("Complexion", "Fair"),
-        _buildGridItem("Body Type", "Slim"),
-        _buildGridItem("Physical Status", "Normal"),
+        _buildGridItem("Height", phys['height'] ?? "N/A"),
+        _buildGridItem("Weight", phys['weight'] ?? "N/A"),
+        _buildGridItem("Blood Group", phys['bloodGroup'] ?? "N/A"),
+        _buildGridItem("Complexion", phys['complexion'] ?? "N/A"),
+        _buildGridItem("Personality", phys['personality'] ?? "N/A"),
+        _buildGridItem("Physical Status",
+            phys['physicalDisabilities'] == true ? "Disability" : "Normal"),
       ],
     );
   }
 
-  Widget _buildEducationCareer() {
+  Widget _buildEducationCareer(Map<dynamic, dynamic> user) {
+    var edu = user['educationDetails'] ?? {};
     return Column(
       children: [
-        _buildGridItem("Education", "B.Tech (Computer Science)"),
-        _buildGridItem("Occupation", "Software Engineer"),
-        _buildGridItem("Employed in", "Private Sector"),
-        _buildGridItem("Income", "₹ 8 LPA - 10 LPA"),
-        _buildGridItem("Work Location", "Pune, Maharashtra"),
+        _buildGridItem("Education", edu['education'] ?? "N/A"),
+        _buildGridItem("Occupation", edu['occupationType'] ?? "N/A"),
+        _buildGridItem("Income", edu['incomePerMonth'] ?? "N/A"),
+        _buildGridItem("Area", edu['educationArea'] ?? "N/A"),
       ],
     );
   }
 
-  Widget _buildFamilyBackground() {
+  Widget _buildFamilyBackground(Map<dynamic, dynamic> user) {
+    var fam = user['familyBackground'] ?? {};
     return Column(
       children: [
-        _buildGridItem("Father", "Ramesh Sharma (Business)"),
-        _buildGridItem("Mother", "Sunita Sharma (Home Maker)"),
-        _buildGridItem("Brothers", "1 (Married)"),
-        _buildGridItem("Sisters", "1 (Unmarried)"),
-        _buildGridItem("Native Place", "Satara, Maharashtra"),
-        _buildGridItem("Parents Contact", "+91 9876543210"),
+        _buildGridItem("Father Alive", fam['father'] ?? "N/A"),
+        _buildGridItem("Mother Alive", fam['mother'] ?? "N/A"),
+        _buildGridItem("Brothers", fam['brotherCount']?.toString() ?? "0"),
+        _buildGridItem("Sisters", fam['sisterCount']?.toString() ?? "0"),
+        _buildGridItem("City", fam['city'] ?? "N/A"),
+        _buildGridItem("Family Wealth", fam['familyWealth'] ?? "N/A"),
       ],
     );
   }
 
-  Widget _buildHoroscopeDetails() {
+  Widget _buildHoroscopeDetails(Map<dynamic, dynamic> user) {
+    var hero = user['horoscopeDetails'] ?? {};
     return Column(
       children: [
-        _buildGridItem("Rashi", "Vrishabh (Taurus)"),
-        _buildGridItem("Nakshatra", "Rohini"),
-        _buildGridItem("Mangal", "No"),
-        _buildGridItem("Nadi", "Madhya"),
-        _buildGridItem("Gan", "Manushya"),
-        _buildGridItem("Time of Birth", "10:30 AM"),
+        _buildGridItem("Rashi", hero['rashi'] ?? "N/A"),
+        _buildGridItem("Nakshatra", hero['nakshatra'] ?? "N/A"),
+        _buildGridItem("Mangal", hero['mangal'] ?? "N/A"),
+        _buildGridItem("Nadi", hero['nadi'] ?? "N/A"),
+        _buildGridItem("Gan", hero['gan'] ?? "N/A"),
+        _buildGridItem("Charan", hero['charan'] ?? "N/A"),
       ],
     );
   }
 
-  Widget _buildLifestyle() {
+  Widget _buildLifestyle(Map<dynamic, dynamic> user) {
+    var phys = user['physicalAttributes'] ?? {};
     return Column(
       children: [
-        _buildGridItem("Diet", "Vegetarian"),
-        _buildGridItem("Drink", "No"),
-        _buildGridItem("Smoke", "No"),
-        _buildGridItem("Hobby", "Reading, Traveling, Music"),
+        _buildGridItem("Diet", phys['diet'] ?? "N/A"),
+        _buildGridItem("Drink", phys['drink'] == true ? "Yes" : "No"),
+        _buildGridItem("Smoke", phys['smoke'] == true ? "Yes" : "No"),
+        _buildGridItem("Personality", phys['personality'] ?? "N/A"),
       ],
     );
   }

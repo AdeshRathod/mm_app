@@ -140,6 +140,17 @@ class RegistrationState extends State<RegistrationScreen>
                           ),
                         ),
                         const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () {
+                            // Get.back(); // Or navigate to Login
+                            // Assuming Login is the previous screen or we want to go there
+                            Get.back();
+                          },
+                          child: const Text(
+                            "Already have an account? Login",
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                        ),
                       ],
                     ),
                   ),

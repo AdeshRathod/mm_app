@@ -1,5 +1,6 @@
-
 import 'package:get/get.dart';
+import 'package:app/module/login/login_binding.dart';
+import 'package:app/module/login/login_screen.dart';
 import 'package:app/common/constants/app_routes.dart';
 import 'package:app/module/about_us/about_us_binding.dart';
 import 'package:app/module/about_us/about_us_screen.dart';
@@ -12,7 +13,6 @@ import 'package:app/module/faq/faq_screen.dart';
 import 'package:app/module/help_center/help_center_binding.dart';
 import 'package:app/module/help_center/help_center_screen.dart';
 import 'package:app/module/home/home_binding.dart';
-import 'package:app/module/home/home_screen.dart';
 import 'package:app/module/membership/membership_binding.dart';
 import 'package:app/module/membership/membership_screen.dart';
 import 'package:app/module/onboarding/onboarding_binding.dart';
@@ -43,11 +43,7 @@ class AppPages {
       page: () => const SplashScreen(),
       binding: SplashBinding(),
     ),
-    GetPage(
-      name: AppRoutes.home,
-      page: () => const HomeScreen(),
-      binding: HomeBinding(),
-    ),
+
     GetPage(
       name: AppRoutes.onboarding,
       page: () => const OnboardingScreen(),
@@ -55,7 +51,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.registration,
-      page: () =>  RegistrationScreen(),
+      page: () => RegistrationScreen(),
       binding: RegistrationBinding(),
     ),
     GetPage(
@@ -124,7 +120,10 @@ class AppPages {
       page: () => const OtpScreen(),
       binding: OtpBinding(),
     ),
-
-
+    GetPage(
+      name: AppRoutes.login,
+      page: () => const LoginScreen(),
+      binding: LoginBinding(),
+    ),
   ];
 }

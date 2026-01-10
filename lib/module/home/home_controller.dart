@@ -1,14 +1,9 @@
-
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:app/module/home/home_screen.dart';
-import 'package:app/module/registration/registration_binding.dart';
-import 'package:app/module/registration/registration_screen.dart';
 
 class HomeController extends GetxController {
-
   // late AnimationController _controller ;
   final ScrollController _scrollController = ScrollController();
   late Timer _timer;
@@ -27,7 +22,6 @@ class HomeController extends GetxController {
     //   _selectedIndex++;
     // });
   }
-
 
   @override
   void dispose() {

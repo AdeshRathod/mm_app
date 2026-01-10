@@ -9,17 +9,49 @@ import '../../common/widgets/custom_circular_button.dart';
 import '../../common/widgets/custom_text_button.dart';
 import '../../common/widgets/custom_texts.dart';
 
-Widget socialMediaLinks(){
+Widget socialMediaLinks() {
   return Container(
     color: AppColors.lightBlack,
     child: SingleChildScrollView(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          IconButton(onPressed: (){}, icon: Icon(Icons.call, color: Colors.black45,size: 20,), hoverColor: Colors.white,),
-          IconButton(onPressed: (){}, icon: Icon(Icons.telegram_sharp,color: Colors.black45,size: 20,), hoverColor: Colors.white,),
-          IconButton(onPressed: (){}, icon: Icon(Icons.call, color: Colors.black45,size: 20,),hoverColor: Colors.white,),
-          IconButton(onPressed: (){}, icon: Icon(Icons.telegram_sharp,color: Colors.black45,size: 20,),hoverColor: Colors.white,),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.call,
+              color: Colors.black45,
+              size: 20,
+            ),
+            hoverColor: Colors.white,
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.telegram_sharp,
+              color: Colors.black45,
+              size: 20,
+            ),
+            hoverColor: Colors.white,
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.call,
+              color: Colors.black45,
+              size: 20,
+            ),
+            hoverColor: Colors.white,
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.telegram_sharp,
+              color: Colors.black45,
+              size: 20,
+            ),
+            hoverColor: Colors.white,
+          ),
           // IconButton(onPressed: (){}, icon:Image.asset("assets/images/facebook.png", width:10, height: 10,)),
           // IconButton(onPressed: (){}, icon: Image.asset("assets/images/instagram.png", width:10, height: 10,)),
           // IconButton(onPressed: (){}, icon:Image.asset("assets/images/google.png", width:10, height: 10,)),
@@ -33,7 +65,7 @@ Widget socialMediaLinks(){
   );
 }
 
-Widget showMenuOptions(maxWidth){
+Widget showMenuOptions(maxWidth) {
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: Row(
@@ -41,82 +73,172 @@ Widget showMenuOptions(maxWidth){
       children: [
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Home", textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Home",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Rules" ,textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Rules",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Enroll",textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Enroll",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Renew" ,textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Renew",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Profiles",textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Profiles",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "About Us" ,textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "About Us",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Contact us",textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Contact us",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Success Stories",textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Success Stories",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: CustomText(text: "Login" ,textColour: AppColors.primary, textSize: 12,),
+          child: CustomText(
+            text: "Login",
+            textColour: AppColors.primary,
+            textSize: 12,
+          ),
         ),
       ],
     ),
   );
 }
 
-Widget showMenuAndroidOptions(){
+Widget showMenuAndroidOptions() {
   return Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      CustomText(text: "Home", textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Rules" ,textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Enroll",textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Renew" ,textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Profiles",textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "About Us" ,textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Contact us",textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Success Stories",textColour: AppColors.textDarkGrey, textSize: 12,),
-      CustomText(text: "Login" ,textColour: AppColors.textDarkGrey, textSize: 12,),
+      CustomText(
+        text: "Home",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Rules",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Enroll",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Renew",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Profiles",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "About Us",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Contact us",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Success Stories",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
+      CustomText(
+        text: "Login",
+        textColour: AppColors.textDarkGrey,
+        textSize: 12,
+      ),
     ],
   );
 }
 
-Widget detailsCard(constraints,title, desc , context , width , height){
+Widget detailsCard(constraints, title, desc, context, width, height) {
   return Padding(
     padding: const EdgeInsets.all(10.0),
     child: Card(
       child: Container(
         width: width,
         height: height,
-        margin:const EdgeInsets.all(10.0) ,
+        margin: const EdgeInsets.all(10.0),
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             Icon(Icons.app_registration_rounded),
-            CustomText(text: title, textAlign: TextAlign.center, textSize: 13,textColour: AppColors.primaryBlack,),
+            CustomText(
+              text: title,
+              textAlign: TextAlign.center,
+              textSize: 13,
+              textColour: AppColors.primaryBlack,
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Divider(color: AppColors.primary, height: 1,),
+              child: Divider(
+                color: AppColors.primary,
+                height: 1,
+              ),
             ),
-            Expanded( flex: 2,child: CustomText(text: desc,textSize: 12,textColour: AppColors.primaryBlack,textAlign: TextAlign.left,)),
-            CustomCircularButton(ButtonTextValue:"Read more" , onPressed: (){}, isButtonDisable:false)
+            Expanded(
+                flex: 2,
+                child: CustomText(
+                  text: desc,
+                  textSize: 12,
+                  textColour: AppColors.primaryBlack,
+                  textAlign: TextAlign.left,
+                )),
+            CustomCircularButton(
+                ButtonTextValue: "Read more",
+                onPressed: () {},
+                isButtonDisable: false)
           ],
         ),
       ),
@@ -124,27 +246,34 @@ Widget detailsCard(constraints,title, desc , context , width , height){
   );
 }
 
-Widget circularPercentage( radius, lineWidth, percentage,desc , barColor, textColor, barPercent,height, width){
+Widget circularPercentage(radius, lineWidth, percentage, desc, barColor,
+    textColor, barPercent, height, width) {
   return CircularPercentIndicator(
-    radius:radius,
+    radius: radius,
     lineWidth: lineWidth,
     animation: true,
     percent: barPercent,
-    center:  CustomText(text:percentage,textSize: 14,textColour: textColor?? AppColors.primaryBlack,
+    center: CustomText(
+      text: percentage,
+      textSize: 14,
+      textColour: textColor ?? AppColors.primaryBlack,
     ),
     footer: Container(
       width: width,
       height: height,
       padding: const EdgeInsets.all(10.0),
-      child: CustomText(text: desc,textSize: 14,textColour: textColor?? AppColors.primaryBlack,
+      child: CustomText(
+        text: desc,
+        textSize: 14,
+        textColour: textColor ?? AppColors.primaryBlack,
       ),
     ),
     circularStrokeCap: CircularStrokeCap.round,
-    progressColor: barColor ??AppColors.primaryDarkLight,
+    progressColor: barColor ?? AppColors.primaryDarkLight,
   );
 }
 
-Widget labelValueRow( label, value) {
+Widget labelValueRow(label, value) {
   return Container(
     width: 120,
     margin: EdgeInsets.only(left: 10),
@@ -156,16 +285,14 @@ Widget labelValueRow( label, value) {
         CustomTextBold(
           text: "$label: ",
           textAlign: TextAlign.left,
-          textColour:
-          AppColors.primaryBlack,
+          textColour: AppColors.primaryBlack,
           textSize: 12,
         ),
         Expanded(
           child: CustomText(
             text: value,
             textAlign: TextAlign.left,
-            textColour:
-            AppColors.primaryBlack,
+            textColour: AppColors.primaryBlack,
             textSize: 12,
             maxline: 1,
           ),
@@ -232,6 +359,3 @@ Widget labelValueRow( label, value) {
 //     ),
 //   );
 // }
-
-
-

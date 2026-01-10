@@ -17,12 +17,15 @@ import 'package:app/module/rules/rules_binding.dart';
 import 'package:app/module/rules/rules_screen.dart';
 import 'package:app/module/terms_and_conditions/terms_conditions_binding.dart';
 import 'package:app/module/terms_and_conditions/terms_conditions_screen.dart';
+import 'package:app/module/login/login_binding.dart';
+import 'package:app/module/login/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingMenuCard extends StatelessWidget {
-  String title;
-  int flag;
+  final String title;
+  final int flag;
 
-  SettingMenuCard(this.title, this.flag, {super.key});
+  const SettingMenuCard(this.title, this.flag, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,22 +35,29 @@ class SettingMenuCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           flag == 1
-              ? Get.to(const AboutUsScreen(),binding: AboutUsBinding())
+              ? Get.to(const AboutUsScreen(), binding: AboutUsBinding())
               : flag == 2
-                  ? Get.to(const MembershipScreen(),binding: MembershipBinding())
+                  ? Get.to(const MembershipScreen(),
+                      binding: MembershipBinding())
                   : flag == 3
-                      ? Get.to(const RulesScreen(),binding: RulesBinding())
+                      ? Get.to(const RulesScreen(), binding: RulesBinding())
                       : flag == 4
-                          ? Get.to(const FaqScreen(),binding: FaqBinding())
+                          ? Get.to(const FaqScreen(), binding: FaqBinding())
                           : flag == 5
-                              ? Get.to(const ContactUsScreen(),binding: ContactUsBinding())
+                              ? Get.to(const ContactUsScreen(),
+                                  binding: ContactUsBinding())
                               : flag == 6
-                                  ? Get.to(const HelpCenterScreen(),binding: HelpCenterBinding())
+                                  ? Get.to(const HelpCenterScreen(),
+                                      binding: HelpCenterBinding())
                                   : flag == 7
-                                      ? Get.to(const TermsConditionsScreen(),binding: TermsConditionsBinding())
+                                      ? Get.to(const TermsConditionsScreen(),
+                                          binding: TermsConditionsBinding())
                                       : flag == 8
-                                          ? Get.to(const PrivacyPolicyScreen(),binding: PrivacyPolicyBinding())
-                                          : null;
+                                          ? Get.to(const PrivacyPolicyScreen(),
+                                              binding: PrivacyPolicyBinding())
+                                          : flag == 9
+                                              ? _logout()
+                                              : null;
         },
         child: Row(
           children: [
@@ -70,7 +80,9 @@ class SettingMenuCard extends StatelessWidget {
                                             ? Icons.auto_stories
                                             : flag == 8
                                                 ? Icons.privacy_tip
-                                                : null,
+                                                : flag == 9
+                                                    ? Icons.logout
+                                                    : null,
                 color: Colors.grey,
                 size: 24,
               ),
@@ -86,5 +98,12 @@ class SettingMenuCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+    await prefs.remove('user_id');
+    Get.offAll(() => const LoginScreen(), binding: LoginBinding());
   }
 }

@@ -1,12 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:app/module/registration/models/registration_model.dart';
-
 import '../profile/complete_profile_binding.dart';
 import '../profile/complete_profile_screen.dart';
 import 'package:app/core/Server.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegistrationController extends GetxController {
   // final formKey = GlobalKey<FormState>();
@@ -57,6 +55,19 @@ class RegistrationController extends GetxController {
     update();
   }
 
+  void _showSnackBar(String title, String message, {Color? backgroundColor}) {
+    if (Get.context != null) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          content: Text("$title: $message",
+              style: const TextStyle(color: Colors.white)),
+          backgroundColor: backgroundColor ?? Colors.black,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void registerUser() {
     if (validateForm()) {
       // Proceed with registration
@@ -66,11 +77,6 @@ class RegistrationController extends GetxController {
       // Format date from "dd - MM - yyyy" to "yyyy-MM-dd"
       String formattedDate = "";
       try {
-        // Assuming format "dd - MM - yyyy" based on selectDate method
-        // We need to parse strict to avoid errors if format changes or is manually edited (though readOnly)
-        // The selectDate method sets: "${d.day} - ${d.month} - ${d.year}"
-        // Note: d.day and d.month don't have leading zeros in the current implementation of selectDate
-
         List<String> parts = controllerBirthDate.text.split(' - ');
         if (parts.length == 3) {
           String day = parts[0].padLeft(2, '0');
@@ -78,12 +84,11 @@ class RegistrationController extends GetxController {
           String year = parts[2];
           formattedDate = "$year-$month-$day";
         } else {
-          // Fallback or error
           formattedDate = controllerBirthDate.text;
         }
       } catch (e) {
         debugPrint("Date Parse Error: $e");
-        formattedDate = controllerBirthDate.text; // Send as is if fail
+        formattedDate = controllerBirthDate.text;
       }
 
       Map<String, dynamic> body = {
@@ -100,56 +105,35 @@ class RegistrationController extends GetxController {
       };
 
       try {
-        server.api!.registerUser(body).then((response) {
-          Get.snackbar("Success", "Registration Successful",
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green,
-              colorText: Colors.white);
-          Get.to(() => const CompleteProfileScreen(),
+        server.api!.registerUser(body).then((response) async {
+          _showSnackBar("Success", "Registration Successful",
+              backgroundColor: Colors.green);
+
+          if (response['access_token'] != null) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('access_token', response['access_token']);
+            if (response['user'] != null && response['user']['_id'] != null) {
+              await prefs.setString('user_id', response['user']['_id']);
+            }
+          }
+
+          Get.offAll(() => const CompleteProfileScreen(),
               binding: CompleteProfileBinding());
         }).catchError((error) {
           String errorMessage = "Registration Failed";
           if (error is DioException) {
             errorMessage = error.response?.data['message'] ?? error.message;
           }
-          Get.snackbar("Error", errorMessage,
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.redAccent,
-              colorText: Colors.white);
+          _showSnackBar("Error", errorMessage,
+              backgroundColor: Colors.redAccent);
         });
       } catch (e) {
-        Get.snackbar("Error", "Something went wrong",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent,
-            colorText: Colors.white);
+        _showSnackBar("Error", "Something went wrong",
+            backgroundColor: Colors.redAccent);
       }
-
-      /*
-      var registrationModel = RegistrationModel(
-          firstName: controllerFirstName.text,
-          lastName: controllerLastName.text,
-          middleName: controllerMiddleName.text,
-          gender: dropdownValueGender,
-          birthdate: controllerBirthDate.text.toString(),
-          subCaste: dropdownValueSubCaste,
-          email: controllerEmail.text,
-          mobile: controllerMobileNo.text,
-          password: controllerPassword.text);
-
-      try {
-        // Firebase logic here
-        // FirebaseFirestore.instance.collection('Registered').doc(registrationModel.mobile).set(registrationModel.registrationToJson());
-        // setFieldToBlank();
-        // Get.to(const CompleteProfileScreen(), binding: CompleteProfileBinding());
-      } catch (e) {
-        debugPrint("Registration Exception $e");
-      }
-      */
     } else {
-      Get.snackbar("Error", "Please fill all fields correctly",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white);
+      _showSnackBar("Error", "Please fill all fields correctly",
+          backgroundColor: Colors.redAccent);
     }
   }
 

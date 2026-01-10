@@ -2,36 +2,34 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/common/constants/app_colours.dart';
-import 'package:app/module/search/search_binding.dart';
+import 'package:app/module/social/social_binding.dart';
 import 'package:app/module/profile/profile_detail_screen.dart';
 import 'package:app/module/profile/profile_detail_binding.dart';
 
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+class ShortlistedProfilesScreen extends StatelessWidget {
+  const ShortlistedProfilesScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GetX<SearchProfileController>(
+    return GetX<SocialController>(
       builder: (controller) => Scaffold(
         backgroundColor: const Color(0xFFF5F5F5),
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
-          title: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: TextField(
-              controller: controller.searchController,
-              onChanged: controller.performSearch,
-              decoration: const InputDecoration(
-                hintText: "Search by name or ID...",
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
-              ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios,
+                color: Colors.black87, size: 20),
+            onPressed: () => Get.back(),
+          ),
+          centerTitle: true,
+          title: const Text(
+            "Shortlisted Profiles",
+            style: TextStyle(
+              color: Colors.black87,
+              fontFamily: 'Rubik-bold',
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
         ),
@@ -39,32 +37,20 @@ class SearchScreen extends StatelessWidget {
             ? const Center(
                 child:
                     CircularProgressIndicator(color: AppColors.theameColorRed))
-            : controller.searchResults.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off,
-                            size: 60, color: Colors.grey[400]),
-                        const SizedBox(height: 10),
-                        Text("No profiles found",
-                            style: TextStyle(color: Colors.grey[600])),
-                      ],
-                    ),
-                  )
+            : controller.shortlistedUsers.isEmpty
+                ? const Center(child: Text("No shortlisted profiles yet"))
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: controller.searchResults.length,
+                    itemCount: controller.shortlistedUsers.length,
                     itemBuilder: (context, index) {
-                      return _buildSearchResultCard(
-                          controller.searchResults[index]);
+                      return _buildUserCard(controller.shortlistedUsers[index]);
                     },
                   ),
       ),
     );
   }
 
-  Widget _buildSearchResultCard(dynamic user) {
+  Widget _buildUserCard(dynamic user) {
     String name = user['name'] ?? "${user['firstName']} ${user['lastName']}";
     String age = user['age']?.toString() ?? "N/A";
     String city = user['basicDetails']?['city'] ?? "N/A";
@@ -79,28 +65,28 @@ class SearchScreen extends StatelessWidget {
             binding: ProfileDetailBinding(), arguments: user['_id']);
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Row(
           children: [
             CircleAvatar(
-              radius: 30,
+              radius: 40,
               backgroundColor: Colors.grey[200],
               backgroundImage:
                   photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
               child: photoUrl.isEmpty
-                  ? const Icon(Icons.person, color: Colors.grey)
+                  ? const Icon(Icons.person, size: 40, color: Colors.grey)
                   : null,
             ),
             const SizedBox(width: 15),
@@ -111,16 +97,21 @@ class SearchScreen extends StatelessWidget {
                   Text(
                     name,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Rubik-bold',
+                    ),
                   ),
+                  const SizedBox(height: 4),
                   Text("$age Yrs • $city",
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  const SizedBox(height: 4),
                   Text(occupation,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 11)),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           ],
         ),
       ),

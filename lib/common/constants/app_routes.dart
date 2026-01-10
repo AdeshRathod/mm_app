@@ -1,5 +1,3 @@
-
-
 class AppRoutes {
   static const splash = '/splash';
   static const home = '/home';
@@ -10,7 +8,7 @@ class AppRoutes {
   static const search = '/search';
   static const settings = '/settings';
   static const otp = '/otp';
-
+  static const login = '/login';
 
   static const aboutUs = '/about_us';
   static const contactUs = '/contact_us';

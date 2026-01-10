@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/module/recommended_matches/recommended_matches_binding.dart';
+import 'package:app/common/constants/app_colours.dart';
 import 'package:app/module/profile/profile_detail_screen.dart';
 import 'package:app/module/profile/profile_detail_binding.dart';
 
@@ -32,27 +33,46 @@ class RecommendedMatchesScreen extends StatelessWidget {
             ),
           ),
         ),
-        body: GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75, // Taller for profile cards
-            crossAxisSpacing: 15,
-            mainAxisSpacing: 15,
-          ),
-          itemCount: 10, // Dummy count
-          itemBuilder: (context, index) {
-            return _buildGridProfileCard();
-          },
-        ),
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(
+                child:
+                    CircularProgressIndicator(color: AppColors.theameColorRed));
+          }
+          if (controller.users.isEmpty) {
+            return const Center(child: Text("No matches found"));
+          }
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75, // Taller for profile cards
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: controller.users.length,
+            itemBuilder: (context, index) {
+              return _buildGridProfileCard(controller.users[index]);
+            },
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildGridProfileCard() {
+  Widget _buildGridProfileCard(dynamic user) {
+    String name = user['name'] ?? "${user['firstName']} ${user['lastName']}";
+    String age = user['age']?.toString() ?? "N/A";
+    String height = user['physicalAttributes']?['height'] ?? "N/A";
+    String occupation = user['educationDetails']?['occupationType'] ?? "N/A";
+    String photoUrl = (user['photos'] != null && user['photos'].isNotEmpty)
+        ? user['photos'][0]['url']
+        : "";
+
     return GestureDetector(
       onTap: () {
-        Get.to(const ProfileDetailScreen(), binding: ProfileDetailBinding());
+        Get.to(const ProfileDetailScreen(),
+            binding: ProfileDetailBinding(), arguments: user['_id']);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -77,25 +97,31 @@ class RecommendedMatchesScreen extends StatelessWidget {
                   color: Colors.grey[200],
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(15)),
+                  image: photoUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(photoUrl), fit: BoxFit.cover)
+                      : null,
                 ),
-                child: Stack(
-                  children: [
-                    Center(
-                      child:
-                          Icon(Icons.person, size: 50, color: Colors.grey[400]),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: CircleAvatar(
-                        radius: 14,
-                        backgroundColor: Colors.white.withOpacity(0.8),
-                        child: const Icon(CupertinoIcons.heart,
-                            size: 16, color: Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
+                child: photoUrl.isEmpty
+                    ? Stack(
+                        children: [
+                          Center(
+                            child: Icon(Icons.person,
+                                size: 50, color: Colors.grey[400]),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.white.withOpacity(0.8),
+                              child: const Icon(CupertinoIcons.heart,
+                                  size: 16, color: Colors.grey),
+                            ),
+                          ),
+                        ],
+                      )
+                    : null,
               ),
             ),
             Expanded(
@@ -106,11 +132,11 @@ class RecommendedMatchesScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Priya Sharma",
+                    Text(
+                      name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Rubik-bold',
@@ -118,12 +144,12 @@ class RecommendedMatchesScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "24 Yrs, 5'6\"",
+                      "$age Yrs, $height",
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "Software Engineer",
+                      occupation,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.grey[600], fontSize: 11),

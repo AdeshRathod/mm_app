@@ -1,19 +1,17 @@
-
-import 'package:flutter/widgets.dart';
+import 'package:app/module/login/login_binding.dart';
+import 'package:app/module/login/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/module/onboarding/onboarding_screen.dart';
-import 'package:app/module/registration/registration_binding.dart';
-import 'package:app/module/registration/registration_screen.dart';
-import 'package:app/module/settings/settings_screen.dart';
 
 class OnboardingController extends GetxController {
-
   final introKey = GlobalKey<OnboardingScreenState>();
 
-  // Core _core = new Core();
-  void onIntroEnd(context) {
-    // _core.setUserOnBoard();
-    Get.to( RegistrationScreen(), binding: RegistrationBinding());
+  void onIntroEnd(context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('seen_onboarding', true);
+    Get.offAll(() => const LoginScreen(), binding: LoginBinding());
   }
 
   Widget buildImage(String assetName) {
