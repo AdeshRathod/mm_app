@@ -1,9 +1,11 @@
-
 import 'package:get/get.dart';
+import 'package:app/module/search/search_binding.dart';
+import 'package:app/module/search/search_screen.dart';
 import 'package:app/module/settings/settings_binding.dart';
 import 'package:app/module/settings/settings_screen.dart';
 
 class DashboardController extends GetxController {
+  int selectedIndex = 0;
 
   @override
   void onInit() {
@@ -11,6 +13,8 @@ class DashboardController extends GetxController {
   }
 
   void onBottomBarItemTap(int value) {
+    selectedIndex = value;
+    update();
     switch (value) {
       case 0:
         // Navigator.push(
@@ -19,10 +23,7 @@ class DashboardController extends GetxController {
         // );
         break;
       case 1:
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => ActivityUserList()),
-        // );
+        Get.to(const SearchScreen(), binding: SearchBinding());
         break;
       case 2:
         // Navigator.push(
@@ -31,13 +32,7 @@ class DashboardController extends GetxController {
         // );
         break;
       case 3:
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => ActivityNotificationScreen()),
-        // );
-        break;
-      case 4:
-        Get.to( SettingsScreen(),binding: SettingsBinding());
+        Get.to(SettingsScreen(), binding: SettingsBinding());
         // Navigator.push(
         //   context,
         //   MaterialPageRoute(builder: (context) => ActivitySettingsScreen()),
@@ -45,9 +40,7 @@ class DashboardController extends GetxController {
         break;
     }
   }
-
 }
-
 
 class DashboardBinding extends Bindings {
   @override

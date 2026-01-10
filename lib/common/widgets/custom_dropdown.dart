@@ -1,22 +1,18 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:app/common/constants/app_colours.dart';
 
-import '../constants/app_images.dart';
-import '../constants/app_strings.dart';
 class CustomDropDown extends StatefulWidget {
-  late String dropdownValue;
-  late List<String> dropdownList;
-  Function onChangedClick;
-  String errorText;
+  final String dropdownValue;
+  final List<String> dropdownList;
+  final Function onChangedClick;
+  final String? errorText;
 
-  CustomDropDown({
+  const CustomDropDown({
     Key? key,
     required this.dropdownValue,
     required this.dropdownList,
     required this.onChangedClick,
-    this.errorText = " ",
+    this.errorText,
   }) : super(key: key);
 
   @override
@@ -27,78 +23,82 @@ class _CustomDropDownState extends State<CustomDropDown> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-// <<<<<<< HEAD
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              border: Border.all(
-                color: AppColors.COLOR_TEXT_FEILD_BORDER,
-                width: 1,
-// =======
-//       child: Container(
-//         width: MediaQuery.of(context).size.width,
-//         decoration: BoxDecoration(
-//           shape: BoxShape.rectangle,
-//           border: Border.all(
-//             color: AppColors.COLOR_TEXT_FEILD_BORDER,
-//             width: 1,
-//           ),
-//           borderRadius: BorderRadius.circular(5),
-//         ),
-//         child: DropdownButton<String>(
-//           value: widget.dropdownValue,
-//           hint: Text(widget.dropdownValue),
-//           isExpanded: true,
-//           iconEnabledColor: Colors.black,
-//           style: const TextStyle(color: Colors.white),
-//           underline: const SizedBox(),
-//           dropdownColor: Colors.white,
-//           onChanged: (String? newValue) {
-//             widget.onChangedClick(newValue);
-//           },
-//           items: widget.dropdownList.map<DropdownMenuItem<String>>((String value) {
-//             return DropdownMenuItem<String>(
-//               value: value,
-//               child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Text(value,
-//                     style: const TextStyle(color: Colors.black)),
-// >>>>>>> 4c738f9533670f228d39d2a3db18aef46ecfaf66
+          InputDecorator(
+            decoration: InputDecoration(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: AppColors.COLOR_TEXT_FEILD_BORDER,
+                ),
               ),
-              borderRadius: BorderRadius.circular(5),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: AppColors.COLOR_TEXT_FEILD_BORDER,
+                  width: 1.0,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                  width: 1.0,
+                ),
+              ),
             ),
-            child: DropdownButton<String>(
-              value: widget.dropdownValue,
-              isExpanded: true,
-              iconEnabledColor: Colors.white,
-              style: const TextStyle(color: Colors.white),
-              underline: const SizedBox(),
-              dropdownColor: AppColors.textColorGrey,
-              onChanged: (String? newValue) {
-                widget.onChangedClick(newValue);
-              },
-              items: widget.dropdownList.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(value,
-                        style: const TextStyle(color: Colors.black)),
-                  ),
-                );
-              }).toList(),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: widget.dropdownList.contains(widget.dropdownValue)
+                    ? widget.dropdownValue
+                    : widget.dropdownList
+                        .first, // Fallback if value not in list, though logic should prevent this
+                isDense: true,
+                isExpanded: true,
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black, fontSize: 16.0),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    widget.onChangedClick(newValue);
+                  }
+                },
+                items: widget.dropdownList
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style:
+                          const TextStyle(color: Colors.black, fontSize: 16.0),
+                    ),
+                  );
+                }).toList(),
+                selectedItemBuilder: (BuildContext context) {
+                  return widget.dropdownList.map<Widget>((String item) {
+                    return Text(
+                      item,
+                      style:
+                          const TextStyle(color: Colors.black, fontSize: 16.0),
+                    );
+                  }).toList();
+                },
+              ),
             ),
           ),
-          Visibility(
-            visible: null != widget.errorText && widget.errorText.length > 0,
-            child: Text(widget.errorText,
-                style: const TextStyle(color: Colors.red, fontSize: 10.0)),
-          )
+          if (widget.errorText != null && widget.errorText!.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0, left: 0.0),
+              child: Text(
+                widget.errorText!,
+                style: const TextStyle(color: Colors.red, fontSize: 12.0),
+              ),
+            ),
         ],
       ),
     );

@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +5,8 @@ import 'package:app/module/registration/models/registration_model.dart';
 
 import '../profile/complete_profile_binding.dart';
 import '../profile/complete_profile_screen.dart';
+import 'package:app/core/Server.dart';
+import 'package:dio/dio.dart';
 
 class RegistrationController extends GetxController {
   // final formKey = GlobalKey<FormState>();
@@ -16,13 +17,14 @@ class RegistrationController extends GetxController {
   final TextEditingController controllerEmail = TextEditingController();
   final TextEditingController controllerMobileNo = TextEditingController();
   final TextEditingController controllerPassword = TextEditingController();
-  final TextEditingController controllerConfirmPassword = TextEditingController();
+  final TextEditingController controllerConfirmPassword =
+      TextEditingController();
+  final TextEditingController controllerBirthDate = TextEditingController();
 
   String? firstNameText,
       middleNameText,
       lastNameText,
       genderText,
-      birthdateText = "Birthdate",
       subCasteText,
       emailText,
       mobileNoText,
@@ -43,127 +45,236 @@ class RegistrationController extends GetxController {
   String dropdownValueGender = 'Gender';
   String dropdownValueSubCaste = 'Sub Caste';
 
-  setGender(newValue){
+  setGender(newValue) {
     dropdownValueGender = newValue;
+    errorGenderText = ""; // clear error on select
     update();
   }
 
-  setSubCaste(newValue){
+  setSubCaste(newValue) {
     dropdownValueSubCaste = newValue;
+    errorSubCasteText = ""; // clear error on select
     update();
   }
 
-  registerUser(){
-    Get.to(const CompleteProfileScreen(),binding: CompleteProfileBinding());
+  void registerUser() {
+    if (validateForm()) {
+      // Proceed with registration
 
-    // if(validateForm()){
-    //   var registrationModel = RegistrationModel(firstName: controllerFirstName.text,
-    //       lastName: controllerLastName.text, middleName: controllerMiddleName.text, gender: dropdownValueGender,
-    //       birthdate: birthdateText.toString(), subCaste: dropdownValueSubCaste, email: controllerEmail.text,
-    //       mobile: controllerMobileNo.text, password: controllerPassword.text);
-    //   try {
-    //     FirebaseFirestore.instance
-    //         .collection('Registered').doc(registrationModel.mobile).set(registrationModel.registrationToJson());
-    //     setFieldToBlank();
-    //     Get.to(const CompleteProfileScreen(),binding: CompleteProfileBinding());
-    //   }catch(e){
-    //     debugPrint("Registration Exception $e");
-    //   }
-    // }
-   }
+      Server server = Server();
 
-  validateForm() {
-    if (controllerFirstName.text == "") {
-      errorFirstNameText = "Invalid first name";
-      update();
-      return false;
+      // Format date from "dd - MM - yyyy" to "yyyy-MM-dd"
+      String formattedDate = "";
+      try {
+        // Assuming format "dd - MM - yyyy" based on selectDate method
+        // We need to parse strict to avoid errors if format changes or is manually edited (though readOnly)
+        // The selectDate method sets: "${d.day} - ${d.month} - ${d.year}"
+        // Note: d.day and d.month don't have leading zeros in the current implementation of selectDate
+
+        List<String> parts = controllerBirthDate.text.split(' - ');
+        if (parts.length == 3) {
+          String day = parts[0].padLeft(2, '0');
+          String month = parts[1].padLeft(2, '0');
+          String year = parts[2];
+          formattedDate = "$year-$month-$day";
+        } else {
+          // Fallback or error
+          formattedDate = controllerBirthDate.text;
+        }
+      } catch (e) {
+        debugPrint("Date Parse Error: $e");
+        formattedDate = controllerBirthDate.text; // Send as is if fail
+      }
+
+      Map<String, dynamic> body = {
+        "firstName": controllerFirstName.text.trim(),
+        "middleName": controllerMiddleName.text.trim(),
+        "lastName": controllerLastName.text.trim(),
+        "email": controllerEmail.text.trim(),
+        "mobile": controllerMobileNo.text.trim(),
+        "birthdate": formattedDate,
+        "password": controllerPassword.text,
+        "confirmPassword": controllerConfirmPassword.text,
+        "gender": dropdownValueGender,
+        "subCaste": dropdownValueSubCaste,
+      };
+
+      try {
+        server.api!.registerUser(body).then((response) {
+          Get.snackbar("Success", "Registration Successful",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green,
+              colorText: Colors.white);
+          Get.to(() => const CompleteProfileScreen(),
+              binding: CompleteProfileBinding());
+        }).catchError((error) {
+          String errorMessage = "Registration Failed";
+          if (error is DioException) {
+            errorMessage = error.response?.data['message'] ?? error.message;
+          }
+          Get.snackbar("Error", errorMessage,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.redAccent,
+              colorText: Colors.white);
+        });
+      } catch (e) {
+        Get.snackbar("Error", "Something went wrong",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white);
+      }
+
+      /*
+      var registrationModel = RegistrationModel(
+          firstName: controllerFirstName.text,
+          lastName: controllerLastName.text,
+          middleName: controllerMiddleName.text,
+          gender: dropdownValueGender,
+          birthdate: controllerBirthDate.text.toString(),
+          subCaste: dropdownValueSubCaste,
+          email: controllerEmail.text,
+          mobile: controllerMobileNo.text,
+          password: controllerPassword.text);
+
+      try {
+        // Firebase logic here
+        // FirebaseFirestore.instance.collection('Registered').doc(registrationModel.mobile).set(registrationModel.registrationToJson());
+        // setFieldToBlank();
+        // Get.to(const CompleteProfileScreen(), binding: CompleteProfileBinding());
+      } catch (e) {
+        debugPrint("Registration Exception $e");
+      }
+      */
+    } else {
+      Get.snackbar("Error", "Please fill all fields correctly",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white);
+    }
+  }
+
+  bool validateForm() {
+    bool isValid = true;
+
+    if (controllerFirstName.text.trim().isEmpty) {
+      errorFirstNameText = "Enter First Name";
+      isValid = false;
     } else {
       errorFirstNameText = "";
-      update();
-      // return true;
     }
-    if (controllerMiddleName.text == "") {
-      errorMiddleNameText = "Invalid middle name";
-      update();
-      return false;
+
+    if (controllerMiddleName.text.trim().isEmpty) {
+      errorMiddleNameText = "Enter Middle Name";
+      isValid = false;
     } else {
       errorMiddleNameText = "";
-      update();
-      // return true;
     }
-    if (controllerLastName.text == "") {
-      errorLastNameText = "Invalid last name";
-      update();
-      return false;
+
+    if (controllerLastName.text.trim().isEmpty) {
+      errorLastNameText = "Enter Last Name";
+      isValid = false;
     } else {
       errorLastNameText = "";
-      update();
-      // return true;
     }
-    if (dropdownValueGender == "Gender" ) {
+
+    if (dropdownValueGender == "Gender") {
       errorGenderText = "Select Gender";
-      update();
-      return false;
+      isValid = false;
     } else {
       errorGenderText = "";
-      update();
-      // return true;
     }
-    if (dropdownValueSubCaste == "Sub Caste" ) {
+
+    if (controllerBirthDate.text.isEmpty) {
+      // Assuming we need to show error on UI somewhere, but currently MmCustomTextField handles text field errors.
+      // For custom widgets like DatePicker, we might need a separate error variable or a Toast.
+      // We'll set a local error string, but might need to reflect it in UI.
+      // For now, consistent with others:
+      errorBirthdateText = "Select Birthdate";
+      isValid = false;
+    } else {
+      errorBirthdateText = "";
+    }
+
+    if (dropdownValueSubCaste == "Sub Caste") {
       errorSubCasteText = "Select Sub Caste";
-      update();
-      return false;
+      isValid = false;
     } else {
       errorSubCasteText = "";
-      update();
-      // return true;
     }
-    if (controllerEmail.text == "" || !controllerEmail.text.isEmail ) {
-      errorEmailText = "Invalid email";
-      update();
-      return false;
+
+    if (controllerEmail.text.trim().isEmpty ||
+        !GetUtils.isEmail(controllerEmail.text.trim())) {
+      errorEmailText = "Enter valid Email";
+      isValid = false;
     } else {
       errorEmailText = "";
-      update();
-      // return true;
     }
-    if (controllerMobileNo.text == "" || !controllerMobileNo.text.isPhoneNumber ) {
-      errorMobileNoText = "Invalid mobile";
-      update();
-      return false;
+
+    if (controllerMobileNo.text.trim().isEmpty ||
+        !RegExp(r'^[0-9]{10}$').hasMatch(controllerMobileNo.text.trim())) {
+      errorMobileNoText = "Enter valid 10-digit Mobile";
+      isValid = false;
     } else {
       errorMobileNoText = "";
-      update();
-      // return true;
     }
-    if (controllerPassword.text == "") {
-      errorPasswordText = "Invalid password";
-      update();
-      return false;
-    }else{
+
+    if (controllerPassword.text.isEmpty || controllerPassword.text.length < 6) {
+      errorPasswordText = "Password must be at least 6 chars";
+      isValid = false;
+    } else {
       errorPasswordText = "";
-      update();
     }
+
     if (controllerConfirmPassword.text != controllerPassword.text) {
-      errorConfirmPasswordText = "Password does not match";
-      update();
-      return false;
-    }else{
+      errorConfirmPasswordText = "Passwords do not match";
+      isValid = false;
+    } else {
       errorConfirmPasswordText = "";
-      update();
     }
-    return true;
+
+    update(); // Update UI with error messages
+    return isValid;
   }
 
-  setFieldToBlank(){
+  // Clear specific error when user types
+  void clearError(String field) {
+    switch (field) {
+      case 'firstName':
+        errorFirstNameText = "";
+        break;
+      case 'middleName':
+        errorMiddleNameText = "";
+        break;
+      case 'lastName':
+        errorLastNameText = "";
+        break;
+      case 'email':
+        errorEmailText = "";
+        break;
+      case 'mobile':
+        errorMobileNoText = "";
+        break;
+      case 'password':
+        errorPasswordText = "";
+        break;
+      case 'confirmPassword':
+        errorConfirmPasswordText = "";
+        break;
+    }
+    update();
+  }
+
+  setFieldToBlank() {
     controllerFirstName.text = "";
     controllerLastName.text = "";
     controllerEmail.text = "";
     dropdownValueGender = "Gender";
     controllerMobileNo.text = "";
-    birthdateText = "";
+    controllerBirthDate.text = "";
     dropdownValueSubCaste = "Sub Caste";
     controllerPassword.text = "";
+    controllerConfirmPassword.text = "";
+
     errorFirstNameText = "";
     errorMiddleNameText = "";
     errorLastNameText = "";
@@ -174,23 +285,38 @@ class RegistrationController extends GetxController {
     errorMobileNoText = "";
     errorPasswordText = "";
     errorConfirmPasswordText = "";
+    update();
   }
 
-  //
   Future<void> selectDate(BuildContext context) async {
     final DateTime? d = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2015),
-      lastDate: DateTime(2020),
-
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.blue, // header background color
+              onPrimary: Colors.white, // header text color
+              onSurface: Colors.black, // body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue, // button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
-    // if (d != null)
-    //   setState(() {
-    //     birthdateText = new DateFormat.yMMMMd("en_US").format(d);
-    //   });
+    if (d != null) {
+      // Format: dd - MM - yyyy
+      controllerBirthDate.text = "${d.day} - ${d.month} - ${d.year}";
+      errorBirthdateText = "";
+      update();
+    }
   }
-
- 
 }
-

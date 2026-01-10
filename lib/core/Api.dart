@@ -15,4 +15,10 @@ class Api {
     final response = await _dio.get('$baseUrl/api/v1/users/');
     return response.data;
   }
+
+  Future<dynamic> registerUser(Map<String, dynamic> data) async {
+    final response =
+        await _dio.post('$baseUrl/api/v1/auth/register', data: data);
+    return response.data;
+  }
 }

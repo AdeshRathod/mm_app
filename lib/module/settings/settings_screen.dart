@@ -12,7 +12,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -92,49 +91,46 @@ class SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          onTap: controller.onBottomBarItemTap,
-          // selectedFontSize: 2.0,
-          showSelectedLabels: true,
-          selectedLabelStyle: const TextStyle(fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontSize: 12),
-          type: BottomNavigationBarType.fixed,
-          currentIndex: 4,
-          items: const [
-            BottomNavigationBarItem(
-                icon: Icon(
-                  CupertinoIcons.home,
-                  color: AppColors.textLightGrey,
-                ),
-                label: 'Home'),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  CupertinoIcons.search,
-                  color: AppColors.textLightGrey,
-                ),
-                label: 'Search'),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  CupertinoIcons.heart,
-                  color: AppColors.textLightGrey,
-                ),
-                label: 'Matches'),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  CupertinoIcons.bell,
-                  color: AppColors.textLightGrey,
-                ),
-                label: 'Notifications'),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  CupertinoIcons.gear,
-                  color: AppColors.primary,
-                ),
-                label: 'Settings')
-          ],
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, -2),
+              )
+            ],
+          ),
+          child: BottomNavigationBar(
+            onTap: controller.onBottomBarItemTap,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            currentIndex: 3, // Settings is index 3
+            iconSize: 18.0,
+            selectedIconTheme: const IconThemeData(size: 18.0),
+            unselectedIconTheme: const IconThemeData(size: 18.0),
+            selectedFontSize: 11.0,
+            unselectedFontSize: 11.0,
+            selectedItemColor: AppColors.theameColorRed,
+            unselectedItemColor: Colors.grey,
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.search), label: 'Search'),
+              BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.heart), label: 'Matches'),
+              BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.gear), label: 'Settings'),
+            ],
+          ),
         ),
       ),
     );
   }
-
 }
