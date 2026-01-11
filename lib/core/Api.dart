@@ -16,6 +16,33 @@ class Api {
     return response.data;
   }
 
+  Future<List<dynamic>> getFilteredUsers({
+    String? gender,
+    int? minAge,
+    int? maxAge,
+    String? city,
+    String? maritalStatus,
+    String? caste,
+    String? education,
+  }) async {
+    final Map<String, dynamic> params = {};
+    if (gender != null) params['gender'] = gender;
+    if (minAge != null) params['minAge'] = minAge;
+    if (maxAge != null) params['maxAge'] = maxAge;
+    if (city != null) params['city'] = city;
+    if (maritalStatus != null) params['maritalStatus'] = maritalStatus;
+    if (caste != null) params['caste'] = caste;
+    if (education != null) params['education'] = education;
+
+    final response =
+        await _dio.get('$baseUrl/api/v1/users/', queryParameters: params);
+    return response.data;
+  }
+
+  Future<void> sendHeartbeat(String userId) async {
+    await _dio.post('$baseUrl/api/v1/users/$userId/heartbeat');
+  }
+
   Future<dynamic> registerUser(Map<String, dynamic> data) async {
     final response =
         await _dio.post('$baseUrl/api/v1/auth/register', data: data);
@@ -102,4 +129,37 @@ class Api {
         .get('$baseUrl/api/v1/social/status?userId=$userId&targetId=$targetId');
     return response.data;
   }
+
+  Future<List<dynamic>> getNotifications(String userId) async {
+    final response = await _dio.get('$baseUrl/api/v1/notifications/',
+        queryParameters: {"receiverId": userId});
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> acceptInterest(String interestId) async {
+    final response =
+        await _dio.post('$baseUrl/api/v1/social/interest/accept/$interestId');
+    return response.data;
+  }
+
+  Future<List<dynamic>> getChatHistory(String user1, String user2) async {
+    final response =
+        await _dio.get('$baseUrl/api/v1/chat/history/$user1/$user2');
+    return response.data;
+  }
+
+  Future<List<dynamic>> getConversations(String userId) async {
+    final response =
+        await _dio.get('$baseUrl/api/v1/chat/conversations/$userId');
+    return response.data;
+  }
+
+  Future<List<dynamic>> getAcceptedConnections(String userId) async {
+    final response =
+        await _dio.get('$baseUrl/api/v1/social/connections/accepted/$userId');
+    return response.data;
+  }
+
+  String get socketUrl =>
+      baseUrl.replaceFirst('https', 'wss').replaceFirst('http', 'ws');
 }

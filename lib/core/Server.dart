@@ -8,12 +8,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Server {
-  Dio dio = Dio();
-  Api? api;
+  late final Dio dio;
+  late final Api api;
 
   static String baseURL = dotenv.env['BASE_URL'] ?? "http://10.246.145.66:8000";
 
   Server() {
+    dio = Dio();
     dio.interceptors.add(CustomInterceptors());
     dio.options.baseUrl = baseURL;
     dio.options.connectTimeout = const Duration(seconds: 5);

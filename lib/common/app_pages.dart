@@ -6,8 +6,6 @@ import 'package:app/module/about_us/about_us_binding.dart';
 import 'package:app/module/about_us/about_us_screen.dart';
 import 'package:app/module/contact_us/contact_us_binding.dart';
 import 'package:app/module/contact_us/contact_us_screen.dart';
-import 'package:app/module/dashboard/dashboard_binding.dart';
-import 'package:app/module/dashboard/dashboard_screen.dart';
 import 'package:app/module/faq/faq_binding.dart';
 import 'package:app/module/faq/faq_screen.dart';
 import 'package:app/module/help_center/help_center_binding.dart';
@@ -35,6 +33,8 @@ import 'package:app/module/splash/splash_binding.dart';
 import 'package:app/module/splash/splash_screen.dart';
 import 'package:app/module/terms_and_conditions/terms_conditions_binding.dart';
 import 'package:app/module/terms_and_conditions/terms_conditions_screen.dart';
+import 'package:app/module/main/bottom_nav.dart';
+import 'package:app/module/main/bottom_nav_binding.dart';
 
 class AppPages {
   static final List<GetPage> pages = [
@@ -61,8 +61,8 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.dashboard,
-      page: () => const DashboardScreen(),
-      binding: DashboardBinding(),
+      page: () => const BottomNavScreen(),
+      binding: BottomNavBinding(),
     ),
     GetPage(
       name: AppRoutes.search,

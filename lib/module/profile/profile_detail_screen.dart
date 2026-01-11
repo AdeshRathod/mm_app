@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/common/constants/app_colours.dart';
 import 'package:app/module/profile/profile_detail_binding.dart';
+import 'package:app/module/profile/complete_profile_screen.dart';
+import 'package:app/module/profile/complete_profile_binding.dart';
 
 class ProfileDetailScreen extends StatelessWidget {
   const ProfileDetailScreen({Key? key}) : super(key: key);
@@ -65,7 +67,8 @@ class ProfileDetailScreen extends StatelessWidget {
               ),
             ],
           ),
-          bottomNavigationBar: _buildBottomAction(controller),
+          bottomNavigationBar:
+              controller.isOwnProfile ? null : _buildBottomAction(controller),
         );
       },
     );
@@ -75,7 +78,6 @@ class ProfileDetailScreen extends StatelessWidget {
       BuildContext context, ProfileDetailController controller) {
     var user = controller.userData;
     String name = user['name'] ?? "${user['firstName']} ${user['lastName']}";
-    String profileId = user['_id']?.toString().substring(0, 8) ?? "N/A";
     String photoUrl = (user['photos'] != null && user['photos'].isNotEmpty)
         ? user['photos'][0]['url']
         : "";
@@ -127,30 +129,30 @@ class ProfileDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                        width: 8,
+                        height: 8,
                         decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.white54)),
-                        child: Text(
-                          "ID: MM$profileId",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
-                        ),
+                            color: controller
+                                        .getOnlineStatus(user['lastActive']) ==
+                                    "Online"
+                                ? Colors.greenAccent
+                                : Colors.grey,
+                            shape: BoxShape.circle),
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        "Last Online: Recently",
+                      const SizedBox(width: 6),
+                      Text(
+                        controller.getOnlineStatus(user['lastActive']),
                         style: TextStyle(
-                            color: Colors.greenAccent,
+                            color: controller
+                                        .getOnlineStatus(user['lastActive']) ==
+                                    "Online"
+                                ? Colors.greenAccent
+                                : Colors.white70,
                             fontSize: 12,
                             fontWeight: FontWeight.w600),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             )
@@ -158,6 +160,14 @@ class ProfileDetailScreen extends StatelessWidget {
         ),
       ),
       actions: [
+        if (controller.isOwnProfile)
+          IconButton(
+            icon: const Icon(CupertinoIcons.pencil, color: Colors.white),
+            onPressed: () {
+              Get.to(() => const CompleteProfileScreen(),
+                  binding: CompleteProfileBinding());
+            },
+          ),
         IconButton(
           icon: const Icon(Icons.share, color: Colors.white),
           onPressed: () {},
@@ -205,6 +215,7 @@ class ProfileDetailScreen extends StatelessWidget {
   }
 
   Widget _buildActionButtons(ProfileDetailController controller) {
+    if (controller.isOwnProfile) return const SizedBox.shrink();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -234,34 +245,63 @@ class ProfileDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-        GestureDetector(
-          onTap: controller.sendInterest,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: controller.isInterestSent
-                      ? Colors.pink[100]
-                      : Colors.grey[100],
+        Obx(() {
+          String status = controller.interestStatus.value;
+          bool isAccepted = status == "accepted";
+          bool isReceivedPending = status == "received_pending";
+          bool isSentPending = status == "sent_pending";
+
+          return GestureDetector(
+            onTap: () {
+              if (isAccepted) {
+                controller.initiateChat();
+              } else if (isReceivedPending) {
+                controller.acceptInterest();
+              } else if (!isSentPending) {
+                controller.sendInterest();
+              }
+            },
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isAccepted
+                        ? Colors.green[100]
+                        : (isSentPending || isReceivedPending)
+                            ? Colors.pink[100]
+                            : Colors.grey[100],
+                  ),
+                  child: Icon(
+                    isAccepted
+                        ? CupertinoIcons.chat_bubble_fill
+                        : (isSentPending || isReceivedPending)
+                            ? CupertinoIcons.heart_fill
+                            : CupertinoIcons.heart,
+                    color: isAccepted
+                        ? Colors.green
+                        : (isSentPending || isReceivedPending)
+                            ? AppColors.theameColorRed
+                            : Colors.grey[700],
+                    size: 26,
+                  ),
                 ),
-                child: Icon(
-                  controller.isInterestSent
-                      ? CupertinoIcons.heart_fill
-                      : CupertinoIcons.heart,
-                  color: controller.isInterestSent
-                      ? AppColors.theameColorRed
-                      : Colors.grey[700],
-                  size: 26,
+                const SizedBox(height: 5),
+                Text(
+                  isAccepted
+                      ? "Message"
+                      : isReceivedPending
+                          ? "Accept"
+                          : isSentPending
+                              ? "Pending"
+                              : "Interest",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-              ),
-              const SizedBox(height: 5),
-              Text(controller.isInterestSent ? "Sent" : "Send Interest",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
@@ -384,55 +424,80 @@ class ProfileDetailScreen extends StatelessWidget {
   }
 
   Widget _buildBottomAction(ProfileDetailController controller) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(color: Colors.white, boxShadow: [
-        BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2))
-      ]),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: controller.initiateChat,
-                style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.theameColorRed),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: const Text("Message",
-                    style: TextStyle(
-                        color: AppColors.theameColorRed,
-                        fontWeight: FontWeight.bold)),
+    return Obx(() {
+      String status = controller.interestStatus.value;
+      bool isAccepted = status == "accepted";
+      bool isReceivedPending = status == "received_pending";
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(color: Colors.white, boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2))
+        ]),
+        child: SafeArea(
+          child: Row(
+            children: [
+              Expanded(
+                child: isReceivedPending
+                    ? ElevatedButton(
+                        onPressed: controller.acceptInterest,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 14)),
+                        child: const Text("Accept Interest",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
+                      )
+                    : OutlinedButton(
+                        onPressed: controller.initiateChat,
+                        style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                                color: isAccepted
+                                    ? AppColors.theameColorRed
+                                    : Colors.grey),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 14)),
+                        child: Text("Message",
+                            style: TextStyle(
+                                color: isAccepted
+                                    ? AppColors.theameColorRed
+                                    : Colors.grey,
+                                fontWeight: FontWeight.bold)),
+                      ),
               ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: controller.initiateCall,
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.call, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
-                    Text("Call Now",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold)),
-                  ],
+              const SizedBox(width: 15),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: controller.initiateCall,
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 14)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.call, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text("Call Now",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+            ],
+          ),
+        ), // SafeArea
+      ); // Container
+    }); // Obx
   }
 }

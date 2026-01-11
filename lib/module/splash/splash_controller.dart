@@ -5,8 +5,8 @@ import 'package:app/module/login/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/module/onboarding/onboarding_binding.dart';
 import 'package:app/module/onboarding/onboarding_screen.dart';
-import 'package:app/module/dashboard/dashboard_binding.dart';
-import 'package:app/module/dashboard/dashboard_screen.dart';
+import 'package:app/module/main/bottom_nav.dart';
+import 'package:app/module/main/bottom_nav_binding.dart';
 
 class SplashController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -15,31 +15,25 @@ class SplashController extends GetxController
 
   @override
   void onInit() {
-    animationInitilization();
     super.onInit();
+    animationInitilization();
     startTimer();
+  }
+
+  @override
+  void onClose() {
+    animationController.dispose();
+    super.onClose();
   }
 
   animationInitilization() {
     animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 3))
-          ..repeat(reverse: false);
+        AnimationController(vsync: this, duration: const Duration(seconds: 3));
     animation = CurvedAnimation(
-            parent: animationController, curve: Curves.fastOutSlowIn)
-        .obs
-        .value;
-    animation.addListener(() => update());
+        parent: animationController, curve: Curves.fastOutSlowIn);
     animationController.forward();
   }
 
-  //
-  @override
-  void dispose() {
-    super.dispose();
-    animationController.dispose();
-  }
-
-  //
   void startTimer() {
     Future.delayed(const Duration(seconds: 3), () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -47,7 +41,7 @@ class SplashController extends GetxController
       bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
 
       if (token != null && token.isNotEmpty) {
-        Get.offAll(() => const DashboardScreen(), binding: DashboardBinding());
+        Get.offAll(() => const BottomNavScreen(), binding: BottomNavBinding());
       } else if (seenOnboarding) {
         Get.offAll(() => const LoginScreen(), binding: LoginBinding());
       } else {

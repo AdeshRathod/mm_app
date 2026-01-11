@@ -1,12 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:app/common/constants/app_colours.dart';
 import 'package:app/module/social/social_binding.dart';
 import 'package:app/module/profile/profile_detail_screen.dart';
 import 'package:app/module/profile/profile_detail_binding.dart';
+import 'package:app/module/chat/chat_list_screen.dart';
 
-class InterestsReceivedScreen extends StatelessWidget {
+class InterestsReceivedScreen extends StatefulWidget {
   const InterestsReceivedScreen({Key? key}) : super(key: key);
+
+  @override
+  _InterestsReceivedScreenState createState() =>
+      _InterestsReceivedScreenState();
+}
+
+class _InterestsReceivedScreenState extends State<InterestsReceivedScreen> {
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView(
+      controller: _pageController,
+      children: [
+        _RequestsBody(onChatPressed: () {
+          _pageController.animateToPage(1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut);
+        }),
+        ChatListScreen(onBack: () {
+          _pageController.animateToPage(0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut);
+        }),
+      ],
+    );
+  }
+}
+
+class _RequestsBody extends StatelessWidget {
+  final VoidCallback onChatPressed;
+  const _RequestsBody({required this.onChatPressed, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +57,7 @@ class InterestsReceivedScreen extends StatelessWidget {
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios,
-                color: Colors.black87, size: 20),
-            onPressed: () => Get.back(),
-          ),
+          automaticallyImplyLeading: false,
           centerTitle: true,
           title: const Text(
             "Interests Received",
@@ -31,6 +68,14 @@ class InterestsReceivedScreen extends StatelessWidget {
               fontSize: 18,
             ),
           ),
+          actions: [
+            IconButton(
+              onPressed: onChatPressed,
+              icon: const Icon(CupertinoIcons.chat_bubble_text,
+                  color: Colors.black87, size: 30),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         body: controller.isLoading.value
             ? const Center(
@@ -107,38 +152,70 @@ class InterestsReceivedScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: Accept logic
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                    if (user['interestStatus'] == 'pending') ...[
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (user['interestId'] != null) {
+                              Get.find<SocialController>()
+                                  .acceptInterest(user['interestId']);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text("Accept",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12)),
                         ),
-                        child: const Text("Accept",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 12)),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // TODO: Decline logic
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.grey),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            if (user['interestId'] != null) {
+                              Get.find<SocialController>()
+                                  .declineInterest(user['interestId']);
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.grey),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text("Decline",
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 12)),
                         ),
-                        child: const Text("Decline",
-                            style: TextStyle(color: Colors.grey, fontSize: 12)),
                       ),
-                    ),
+                    ] else ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: user['interestStatus'] == 'accepted'
+                              ? Colors.green[50]
+                              : Colors.red[50],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          user['interestStatus'] == 'accepted'
+                              ? "Accepted"
+                              : "Declined",
+                          style: TextStyle(
+                            color: user['interestStatus'] == 'accepted'
+                                ? Colors.green
+                                : Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 )
               ],

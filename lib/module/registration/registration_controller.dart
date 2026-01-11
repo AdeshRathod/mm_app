@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../profile/complete_profile_binding.dart';
-import '../profile/complete_profile_screen.dart';
 import 'package:app/core/Server.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app/module/main/bottom_nav.dart';
+import 'package:app/module/main/bottom_nav_binding.dart';
 
 class RegistrationController extends GetxController {
   // final formKey = GlobalKey<FormState>();
@@ -105,7 +105,7 @@ class RegistrationController extends GetxController {
       };
 
       try {
-        server.api!.registerUser(body).then((response) async {
+        server.api.registerUser(body).then((response) async {
           _showSnackBar("Success", "Registration Successful",
               backgroundColor: Colors.green);
 
@@ -117,8 +117,8 @@ class RegistrationController extends GetxController {
             }
           }
 
-          Get.offAll(() => const CompleteProfileScreen(),
-              binding: CompleteProfileBinding());
+          Get.offAll(() => const BottomNavScreen(),
+              binding: BottomNavBinding());
         }).catchError((error) {
           String errorMessage = "Registration Failed";
           if (error is DioException) {

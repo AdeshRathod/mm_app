@@ -22,8 +22,8 @@ class SocialController extends GetxController {
       if (userId != null) {
         Server server = Server();
         final results = await Future.wait([
-          server.api!.getShortlistedUsers(userId),
-          server.api!.getReceivedInterests(userId),
+          server.api.getShortlistedUsers(userId),
+          server.api.getReceivedInterests(userId),
         ]);
 
         shortlistedUsers.value = results[0];
@@ -34,6 +34,21 @@ class SocialController extends GetxController {
     } finally {
       isLoading(false);
     }
+  }
+
+  void acceptInterest(String interestId) async {
+    try {
+      await Server().api.acceptInterest(interestId);
+      // Refresh list
+      fetchSocialData();
+    } catch (e) {
+      print("Error accepting interest: $e");
+    }
+  }
+
+  void declineInterest(String interestId) async {
+    // Implement decline if needed, for now just placeholder
+    print("Decline interest: $interestId");
   }
 }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:app/common/constants/app_colours.dart';
 import 'package:app/module/dashboard/dashboard_screen.dart';
 import 'package:app/module/settings/settings_controller.dart';
 import 'package:app/module/settings/widgets/setting_menu_card.dart';
@@ -97,45 +96,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-          ),
-        ),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, -2),
-              )
-            ],
-          ),
-          child: BottomNavigationBar(
-            onTap: controller.onBottomBarItemTap,
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            currentIndex: 3, // Settings is index 3
-            iconSize: 18.0,
-            selectedIconTheme: const IconThemeData(size: 18.0),
-            unselectedIconTheme: const IconThemeData(size: 18.0),
-            selectedFontSize: 11.0,
-            unselectedFontSize: 11.0,
-            selectedItemColor: AppColors.theameColorRed,
-            unselectedItemColor: Colors.grey,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            items: const [
-              BottomNavigationBarItem(
-                  icon: Icon(CupertinoIcons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                  icon: Icon(CupertinoIcons.search), label: 'Search'),
-              BottomNavigationBarItem(
-                  icon: Icon(CupertinoIcons.heart), label: 'Matches'),
-              BottomNavigationBarItem(
-                  icon: Icon(CupertinoIcons.gear), label: 'Settings'),
-            ],
           ),
         ),
       ),

@@ -60,6 +60,8 @@ dependencies:
 #  razorpay_flutter: any
   fluttertoast: ^8.2.14
   firebase_auth_web: ^5.13.0
+  intl: ^0.20.2
+  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   flutter_test:

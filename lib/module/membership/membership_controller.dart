@@ -54,33 +54,43 @@ class MembershipController extends GetxController {
       double currentPrice = 0;
 
       if (userId != null) {
-        var user = await server.api!.getUser(userId);
-        // Find the price of the current plan
+        var user = await server.api.getUser(userId);
         String currentPlanName = user['subscriptionType'] ?? "Free";
+        String status = user['subscriptionStatus'] ?? "expired";
 
-        // If user is on a paid plan, we need to know its price to filter lower ones
-        // We'll fetch all plans and find the one they are currently on
-        var allPlans = await server.api!.getSubscriptions();
-        for (var p in allPlans) {
-          if (p['name'] == currentPlanName) {
-            currentPrice = (p['price'] ?? 0).toDouble();
-            userCurrentPlan.value = p; // Store the current plan full object
-            break;
+        var allPlans = await server.api.getSubscriptions();
+
+        // Logic:
+        // 1. If status is 'expired' or 'none' or user has no specific plan -> Show ALL plans.
+        // 2. If status is 'active' or 'trial' -> Show Current Plan + Higher Plans.
+
+        bool isSubscriptionActive = (status == 'active' || status == 'trial');
+
+        if (!isSubscriptionActive) {
+          // Case 1: Show all plans
+          subscriptions.value = allPlans;
+        } else {
+          // Case 2: Show current + higher
+          // First, find current plan price
+          for (var p in allPlans) {
+            if (p['name'] == currentPlanName) {
+              currentPrice = (p['price'] ?? 0).toDouble();
+              userCurrentPlan.value = p;
+              break;
+            }
           }
+
+          var filteredPlans = allPlans.where((p) {
+            double pPrice = (p['price'] ?? 0).toDouble();
+            // Show if price >= currentPrice (includes current plan)
+            return pPrice >= currentPrice;
+          }).toList();
+
+          subscriptions.value = filteredPlans;
         }
-
-        // 2. Filter plans: only show plans with price > currentPrice
-        // User said "lower plans should not be visible", implying they want to see upgrade paths.
-
-        var filteredPlans = allPlans.where((p) {
-          double pPrice = (p['price'] ?? 0).toDouble();
-          return pPrice > currentPrice;
-        }).toList();
-
-        subscriptions.value = filteredPlans;
       } else {
         // Fallback if no user_id (should not happen in membership screen)
-        var result = await server.api!.getSubscriptions();
+        var result = await server.api.getSubscriptions();
         subscriptions.value = result;
       }
     } catch (e) {
@@ -171,7 +181,7 @@ class MembershipController extends GetxController {
 
       if (userId != null) {
         Server server = Server();
-        await server.api!.purchaseSubscription(plan['_id'], userId);
+        await server.api.purchaseSubscription(plan['_id'], userId);
 
         Future.delayed(const Duration(seconds: 1), () {
           Get.offAllNamed(AppRoutes.dashboard);
@@ -197,7 +207,7 @@ class MembershipController extends GetxController {
 
       if (userId != null) {
         Server server = Server();
-        await server.api!.purchaseSubscription(plan['_id'], userId);
+        await server.api.purchaseSubscription(plan['_id'], userId);
 
         Future.delayed(const Duration(seconds: 1), () {
           Get.offAllNamed(AppRoutes.dashboard);
@@ -228,7 +238,7 @@ class MembershipController extends GetxController {
 
       if (userId != null) {
         Server server = Server();
-        await server.api!.updateUser(userId, {'subscriptionStatus': 'trial'});
+        await server.api.updateUser(userId, {'subscriptionStatus': 'trial'});
         _showSnackBar("Success", "Free Trial Started!",
             backgroundColor: Colors.green);
         Future.delayed(const Duration(seconds: 1), () {

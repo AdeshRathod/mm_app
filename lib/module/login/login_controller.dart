@@ -1,8 +1,8 @@
 import 'package:app/core/Server.dart';
 import 'package:app/module/profile/complete_profile_binding.dart';
 import 'package:app/module/profile/complete_profile_screen.dart';
-import 'package:app/module/dashboard/dashboard_binding.dart';
-import 'package:app/module/dashboard/dashboard_screen.dart';
+import 'package:app/module/main/bottom_nav.dart';
+import 'package:app/module/main/bottom_nav_binding.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,7 +42,7 @@ class LoginController extends GetxController {
       };
 
       try {
-        server.api!.loginUser(body).then((response) async {
+        server.api.loginUser(body).then((response) async {
           isLoading = false;
           update();
 
@@ -61,8 +61,8 @@ class LoginController extends GetxController {
             Get.offAll(() => const CompleteProfileScreen(),
                 binding: CompleteProfileBinding());
           } else {
-            Get.offAll(() => const DashboardScreen(),
-                binding: DashboardBinding());
+            Get.offAll(() => const BottomNavScreen(),
+                binding: BottomNavBinding());
           }
         }).catchError((error) {
           isLoading = false;
