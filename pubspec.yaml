@@ -76,6 +76,8 @@ dev_dependencies:
   retrofit_generator: ^9.1.5
   build_runner: ^2.4.13
   json_serializable: ^6.9.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -121,3 +123,27 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true # generates mipmap + adaptive icon
+  ios: false # updates AppIcon set in Xcode
+  image_path: assets/images/footer_logo.png
+  remove_alpha_ios: true # <- fixes the alpha warning for App Store
+
+  # Android adaptive icon (optional but recommended)
+  # adaptive_icon_background: "#F57C00"         # or assets/icons/bg.png
+  adaptive_icon_background: "#FFFFFF" # or assets/icons/bg.png
+  adaptive_icon_foreground: assets/images/footer_logo.png
+  # Android 13 “Themed icon” (optional)
+  adaptive_icon_monochrome: assets/images/footer_logo.png
+
+  # If your Android minSdk is < 21 and you’re using adaptive icons,
+  # the tool can set minSdk for you:
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  #  image: assets/images/logo.svg
+  image: assets/images/footer_logo.png
+  android: true
+  ios: true

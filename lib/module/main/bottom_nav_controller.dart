@@ -44,7 +44,7 @@ class BottomNavController extends GetxController {
         interestCount.value =
             interests.where((i) => i['interestStatus'] == 'pending').length;
 
-        // 2. Fetch Matches Count (New users matching criteria)
+        // 2. Fetch Matches Count
         var user = await server.api.getUser(userId);
         String gender = user['gender'] ?? user['basicDetails']?['gender'] ?? "";
         String targetGender = "";
@@ -54,9 +54,7 @@ class BottomNavController extends GetxController {
 
         if (targetGender.isNotEmpty) {
           var matches = await server.api.getFilteredUsers(gender: targetGender);
-          // Filter out self and ensure unique
           var filtered = matches.where((u) => u['_id'] != userId).toList();
-
           totalMatchCount = filtered.length;
 
           // Use server-side tracking
@@ -68,6 +66,10 @@ class BottomNavController extends GetxController {
             matchCount.value = 0;
           }
         }
+      } else {
+        // Guest mode - no counts
+        interestCount.value = 0;
+        matchCount.value = 0;
       }
     } catch (e) {
       print("Error fetching counts: $e");

@@ -24,6 +24,7 @@ class Api {
     String? maritalStatus,
     String? caste,
     String? education,
+    bool forGuest = false,
   }) async {
     final Map<String, dynamic> params = {};
     if (gender != null) params['gender'] = gender;
@@ -33,6 +34,7 @@ class Api {
     if (maritalStatus != null) params['maritalStatus'] = maritalStatus;
     if (caste != null) params['caste'] = caste;
     if (education != null) params['education'] = education;
+    if (forGuest) params['forGuest'] = true;
 
     final response =
         await _dio.get('$baseUrl/api/v1/users/', queryParameters: params);
@@ -120,6 +122,12 @@ class Api {
   Future<List<dynamic>> getReceivedInterests(String userId) async {
     final response =
         await _dio.get('$baseUrl/api/v1/social/interests/received/$userId');
+    return response.data;
+  }
+
+  Future<List<dynamic>> getSentInterests(String userId) async {
+    final response =
+        await _dio.get('$baseUrl/api/v1/social/interests/sent/$userId');
     return response.data;
   }
 

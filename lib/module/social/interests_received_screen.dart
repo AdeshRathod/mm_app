@@ -52,50 +52,72 @@ class _RequestsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetX<SocialController>(
-      builder: (controller) => Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          title: const Text(
-            "Interests Received",
-            style: TextStyle(
-              color: Colors.black87,
-              fontFamily: 'Rubik-bold',
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+      builder: (controller) => DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF5F5F5),
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.white,
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            title: const Text(
+              "Interests",
+              style: TextStyle(
+                color: Colors.black87,
+                fontFamily: 'Rubik-bold',
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            actions: [
+              IconButton(
+                onPressed: onChatPressed,
+                icon: const Icon(CupertinoIcons.chat_bubble_text,
+                    color: Colors.black87, size: 30),
+              ),
+              const SizedBox(width: 8),
+            ],
+            bottom: const TabBar(
+              labelColor: AppColors.theameColorRed,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.theameColorRed,
+              tabs: [
+                Tab(text: "Received"),
+                Tab(text: "Sent"),
+              ],
             ),
           ),
-          actions: [
-            IconButton(
-              onPressed: onChatPressed,
-              icon: const Icon(CupertinoIcons.chat_bubble_text,
-                  color: Colors.black87, size: 30),
-            ),
-            const SizedBox(width: 8),
-          ],
+          body: controller.isLoading.value
+              ? const Center(
+                  child: CircularProgressIndicator(
+                      color: AppColors.theameColorRed))
+              : TabBarView(
+                  children: [
+                    _buildList(controller.receivedInterests, false),
+                    _buildList(controller.sentInterests, true),
+                  ],
+                ),
         ),
-        body: controller.isLoading.value
-            ? const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.theameColorRed))
-            : controller.receivedInterests.isEmpty
-                ? const Center(child: Text("No interests received yet"))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: controller.receivedInterests.length,
-                    itemBuilder: (context, index) {
-                      return _buildInterestCard(
-                          controller.receivedInterests[index]);
-                    },
-                  ),
       ),
     );
   }
 
-  Widget _buildInterestCard(dynamic user) {
+  Widget _buildList(List<dynamic> items, bool isSent) {
+    if (items.isEmpty) {
+      return Center(
+          child: Text(isSent ? "No interests sent" : "No interests received"));
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return _buildInterestCard(items[index], isSent);
+      },
+    );
+  }
+
+  Widget _buildInterestCard(dynamic user, bool isSent) {
     String name = user['name'] ?? "${user['firstName']} ${user['lastName']}";
     String date = user['interestDate']?.split('T')[0] ?? "N/A";
     String photoUrl = (user['photos'] != null && user['photos'].isNotEmpty)
@@ -120,8 +142,10 @@ class _RequestsBody extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              Get.to(const ProfileDetailScreen(),
-                  binding: ProfileDetailBinding(), arguments: user['_id']);
+              if (user['_id'] != null) {
+                Get.to(() => const ProfileDetailScreen(),
+                    binding: ProfileDetailBinding(), arguments: user['_id']);
+              }
             },
             child: CircleAvatar(
               radius: 35,
@@ -147,12 +171,12 @@ class _RequestsBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text("Received on: $date",
+                Text((isSent ? "Sent on: " : "Received on: ") + date,
                     style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    if (user['interestStatus'] == 'pending') ...[
+                    if (!isSent && user['interestStatus'] == 'pending') ...[
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
@@ -197,19 +221,13 @@ class _RequestsBody extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: user['interestStatus'] == 'accepted'
-                              ? Colors.green[50]
-                              : Colors.red[50],
+                          color: _getStatusColor(user['interestStatus']),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          user['interestStatus'] == 'accepted'
-                              ? "Accepted"
-                              : "Declined",
+                          _getStatusText(user['interestStatus']),
                           style: TextStyle(
-                            color: user['interestStatus'] == 'accepted'
-                                ? Colors.green
-                                : Colors.red,
+                            color: _getStatusTextColor(user['interestStatus']),
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -224,5 +242,23 @@ class _RequestsBody extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(String? status) {
+    if (status == 'accepted') return Colors.green[50]!;
+    if (status == 'declined') return Colors.red[50]!;
+    return Colors.orange[50]!;
+  }
+
+  Color _getStatusTextColor(String? status) {
+    if (status == 'accepted') return Colors.green;
+    if (status == 'declined') return Colors.red;
+    return Colors.orange;
+  }
+
+  String _getStatusText(String? status) {
+    if (status == 'accepted') return "Accepted";
+    if (status == 'declined') return "Declined";
+    return "Pending";
   }
 }

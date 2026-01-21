@@ -13,6 +13,7 @@ class ChatListScreen extends StatelessWidget {
   String _formatTime(String? iso) {
     if (iso == null) return "";
     try {
+      if (!iso.endsWith('Z')) iso += 'Z';
       DateTime dt = DateTime.parse(iso).toLocal();
       DateTime now = DateTime.now();
       if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {

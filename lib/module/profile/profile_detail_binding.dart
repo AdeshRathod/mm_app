@@ -188,8 +188,9 @@ class ProfileDetailController extends GetxController {
   String getOnlineStatus(String? lastActiveIso) {
     if (lastActiveIso == null) return "Offline";
     try {
+      if (!lastActiveIso.endsWith('Z')) lastActiveIso += 'Z';
       DateTime lastActive = DateTime.parse(lastActiveIso);
-      Duration diff = DateTime.now().toUtc().difference(lastActive.toUtc());
+      Duration diff = DateTime.now().toUtc().difference(lastActive);
 
       if (diff.inMinutes < 5) return "Online";
       if (diff.inMinutes < 60) return "Active ${diff.inMinutes}m ago";

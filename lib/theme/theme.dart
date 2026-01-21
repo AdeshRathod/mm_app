@@ -1,248 +1,172 @@
 import 'package:app/theme/custom_theme_extension.dart';
 import 'package:flutter/material.dart';
-import '../common/constants/app_colours.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
-  primaryColor: AppColors.primaryLight,
-  // scaffoldBackgroundColor: AppColors.bgColorGrey,
-  scaffoldBackgroundColor: Colors.white,
-  //Appbar
+  useMaterial3: true,
+  primaryColor: const Color(0xFFB71C1C), // Deep Red
+  scaffoldBackgroundColor:
+      const Color(0xFFF9FAFB), // Very light grey, premium feel
+
+  // Font Family
+  fontFamily: 'Roboto', // Fallback to Roboto/System
+
+  // AppBar
   appBarTheme: const AppBarTheme(
-    backgroundColor: AppColors.primary,
+    backgroundColor: Colors.white,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     centerTitle: false,
+    iconTheme: IconThemeData(color: Color(0xFF2D3436), size: 22),
     titleTextStyle: TextStyle(
-      color: AppColors.primaryWhite,
-      fontSize: 20,
-      fontFamily: "SfDisplaySemibold",
-      fontWeight: FontWeight.w600,
+      color: Color(0xFF2D3436),
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 0.5,
     ),
-    iconTheme: IconThemeData(color: AppColors.primaryWhite, size: 16),
   ),
 
-  //BotomNavigationBar
+  // Bottom Navigation
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Colors.white,
-    selectedItemColor: AppColors.homeScreenNavigationBarIcon,
-    unselectedItemColor: AppColors.subTextColor,
+    selectedItemColor: Color(0xFFB71C1C),
+    unselectedItemColor: Color(0xFF9E9E9E),
     type: BottomNavigationBarType.fixed,
-    selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-    unselectedLabelStyle: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
-    selectedIconTheme: IconThemeData(color: AppColors.primaryLight, size: 50),
-    unselectedIconTheme: IconThemeData(color: AppColors.subTextColor, size: 40),
+    elevation: 10,
+    selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+    unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
   ),
 
-  //divider
+  // Divider
   dividerTheme: const DividerThemeData(
-      color: AppColors.dividerColor, thickness: 1, space: 1),
+    color: Color(0xFFEEEEEE),
+    thickness: 1,
+  ),
 
+  // Elevated Button - Premium gradient style needs to be handled in widget, but default style:
   elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ButtonStyle(
-      fixedSize: WidgetStateProperty.all(const Size(336, 48)),
-      backgroundColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.disabled)) {
-          return AppColors.secondary100Color;
-        }
-        return AppColors.primaryLight;
-      }),
-      foregroundColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.disabled)) {
-          return AppColors.secondary100Color;
-        }
-        return AppColors.baseWhiteColor;
-      }),
-      overlayColor:
-          WidgetStateProperty.all(AppColors.primaryLight.withOpacity(0.1)),
-      shape: WidgetStateProperty.all(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.primaryLight),
-        ),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFB71C1C),
+      foregroundColor: Colors.white,
+      elevation: 5,
+      shadowColor: const Color(0xFFB71C1C).withOpacity(0.4),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      padding: WidgetStateProperty.all(
-        const EdgeInsets.symmetric(vertical: 14),
-      ),
-      textStyle: WidgetStateProperty.all(
-        const TextStyle(
-          fontFamily: "NunitoSansSemiBold",
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
-        ),
+      textStyle: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 0.5,
       ),
     ),
   ),
 
-  inputDecorationTheme: const InputDecorationTheme(
+  // Input Decoration
+  inputDecorationTheme: InputDecorationTheme(
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.textFeildBorderColor, width: 1),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-    ),
-    hintStyle: TextStyle(
-        color: AppColors.textFeildBorderColor,
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        fontFamily: "NunitoSansRegular"),
-    border: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.textFeildBorderColor, width: 1),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-    ),
-    disabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.textFeildBorderColor, width: 1),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+      borderRadius: BorderRadius.circular(16),
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.textFeildBorderColor, width: 1),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderSide: const BorderSide(color: Color(0xFFB71C1C), width: 1.5),
+      borderRadius: BorderRadius.circular(16),
     ),
     errorBorder: OutlineInputBorder(
-      // borderSide: BorderSide(color: AppColors.errorTextColor, width: 1),
-      borderSide: BorderSide(color: AppColors.errorColorPink, width: 1),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-    ),
-    errorStyle: TextStyle(
-      color: AppColors.errorColorPink,
-      fontSize: 12,
+      borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      borderRadius: BorderRadius.circular(16),
     ),
     focusedErrorBorder: OutlineInputBorder(
-      // borderSide: BorderSide(color: AppColors.errorTextColor, width: 1),
-      borderSide: BorderSide(color: AppColors.errorColorPink, width: 1),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    hintStyle: TextStyle(
+      color: Colors.grey.shade400,
+      fontSize: 15,
+      fontWeight: FontWeight.w400,
     ),
   ),
 
-  tabBarTheme: TabBarThemeData(
-    overlayColor: WidgetStateProperty.all(Colors.transparent),
-    indicatorColor: Colors.transparent,
-    indicator: const BoxDecoration(
-      color: AppColors.newThemeServicesSvgBg,
-      // color: Colors.grey,
-      border: Border(
-        bottom: BorderSide(
-          color: AppColors.newMagentaThemePrimaryColor,
-          // color: Colors.grey,
-          width: 3,
-        ),
-      ),
-    ),
-    labelColor: AppColors.newMagentaThemePrimaryColor,
-    // labelColor: Colors.grey,
-    unselectedLabelColor: AppColors.newThemeSecondaryColor,
-    // unselectedLabelColor: Colors.grey,
-    labelStyle: const TextStyle(
-      fontSize: 14,
-      fontFamily: "NunitoSansSemiBold",
-      fontWeight: FontWeight.w700,
-    ),
-    unselectedLabelStyle: const TextStyle(
-      fontSize: 14,
-      fontFamily: "NunitoSansSemiBold",
-      fontWeight: FontWeight.w700,
-    ),
-    indicatorSize: TabBarIndicatorSize.tab,
+  // Tab Bar
+  tabBarTheme: const TabBarThemeData(
+    labelColor: Color(0xFFB71C1C),
+    unselectedLabelColor: Color(0xFF757575),
+    indicatorColor: Color(0xFFB71C1C),
+    indicatorSize: TabBarIndicatorSize.label,
+    labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
   ),
-
-  // textTheme: TextTheme(
-  //   bodyLarge: AppTextStyles.regular,
-  //   bodyMedium: AppTextStyles.medium,
-  //   titleMedium: AppTextStyles.semiBold,
-  //   titleLarge: AppTextStyles.bold,
-  // ),
 
   extensions: [
     CustomThemeExtension(
-        //GradientProgressBar
         gradientProgressLoaderCustomTheme: GradientProgressLoaderCustomTheme(
             loaderRadius: 40,
             gradientLoaderColors: const [
-              AppColors.primaryLight,
-              AppColors.textFeildBorderColor,
+              Color(0xFFB71C1C),
+              Color(0xFFFFD700), // Gold
             ],
             strokeWidth: 8),
-        //snackbarsuccess
-        toastSuccessColor: Colors.green,
-        //snackbarerror
-        toastErrorColor: Colors.red,
-        sendInviteContainerBgColor: AppColors.newThemeServicesSvgBg,
+        toastSuccessColor: const Color(0xFF4CAF50),
+        toastErrorColor: const Color(0xFFE53935),
+        sendInviteContainerBgColor: const Color(0xFFFFF8E1), // Light Gold
 
-        //homeiconcolor
-        homeServicesSvgIcon: AppColors.primaryLight,
-        homeServicesSvgBg: AppColors.newThemeServicesSvgBg,
-        //home transaction
-        homeTransitionSvgIcon: AppColors.primaryLight,
-        //qr download
-        downloadSvgIcon: AppColors.primaryLight,
-        //leveltwo icon
-        levelTwoSvgIcon: AppColors.primaryLight,
-        //buttom theme
+        homeServicesSvgIcon: const Color(0xFFB71C1C),
+        homeServicesSvgBg: const Color(0xFFFFEBEE),
+        homeTransitionSvgIcon: const Color(0xFFB71C1C),
+        downloadSvgIcon: const Color(0xFFB71C1C),
+        levelTwoSvgIcon: const Color(0xFFB71C1C),
         customButtonTheme: CustomButtonTheme(
-            enableButtonColor: AppColors.primaryLight,
-            disableButtonColor: AppColors.disableBtnBorderColor,
-            enableBtnTextColor: AppColors.textColor,
-            disableBtnTextColor: AppColors.disableButtonTextColor,
-            enableBtnBorderColor: AppColors.primaryLight,
-            disableBtnBorderColor: AppColors.disableButtonTextColor,
-            circularProgressIndicatorColor: AppColors.primaryLight),
+            enableButtonColor: const Color(0xFFB71C1C),
+            disableButtonColor: const Color(0xFFE0E0E0),
+            enableBtnTextColor: Colors.white,
+            disableBtnTextColor: const Color(0xFF9E9E9E),
+            enableBtnBorderColor: const Color(0xFFB71C1C),
+            disableBtnBorderColor: const Color(0xFFE0E0E0),
+            circularProgressIndicatorColor: Colors.white),
         customLinearGradient: const LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            AppColors.newThemeSecondaryColor2,
-            // AppColors.newThemeSecondaryColor,
-            AppColors.primaryLight,
+            Color(0xFFB71C1C), // Deep Red
+            Color(0xFFE53935), // Lighter Red
           ],
-          stops: [0.0, 0.4],
         ),
-        customLinearGradientHalfScreen: const LinearGradient(
+        customLinearGradientHalfScreen: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.primaryLight,
-            AppColors.newThemeSecondaryColor2,
-            // AppColors.newThemeSecondaryColor.withOpacity(0.1),
+            const Color(0xFFB71C1C),
+            const Color(0xFFB71C1C).withOpacity(0.8),
           ],
-          stops: [0.2, 1.0],
         ),
         customLinearGradientFullScreen: const LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryLight,
-            // AppColors.newThemeSecondaryColor,
-            // AppColors.gradi2,
-            AppColors.gradi3,
+            Color(0xFF8E0000), // Darker Red
+            Color(0xFFB71C1C), // Red
+            Color(0xFFE53935), // Light Red
           ],
-          stops: [0.0, 0.9], // Adjusted stops for smoother transition
-          // stops: [0.0, 0.8, 0.9], // Adjusted stops for smoother transition
         ),
-
-        // LinearGradient(
-        //   begin: Alignment.topCenter,
-        //   end: Alignment.bottomCenter,
-        //   colors: [
-        //     AppColors.primaryLight,
-        //     AppColors.newThemeSecondaryColor,
-        //   ],
-        //   // stops: [0.4, 0.6],
-        // ),
-
         downloadBtnDecoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: AppColors.primaryLight),
+          border: Border.all(color: const Color(0xFFB71C1C)),
           borderRadius: BorderRadius.circular(12),
         ),
         shareBtnDecoration: BoxDecoration(
-          color: AppColors.primaryLight,
-          border: Border.all(color: AppColors.primaryLight),
+          color: const Color(0xFFB71C1C),
+          border: Border.all(color: const Color(0xFFB71C1C)),
           borderRadius: BorderRadius.circular(12),
         ),
         qrCodeDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: AppColors.primaryLight)),
+            border: Border.all(color: const Color(0xFFB71C1C))),
         circularBgForUserInitial: const BoxDecoration(
-          color: AppColors.initialUserBgColor,
+          color: Color(0xFFFFD700), // Gold
           shape: BoxShape.circle,
         ),
         customLoading: const Padding(
@@ -255,22 +179,22 @@ final ThemeData lightTheme = ThemeData(
                 height: 30,
                 child: LoadingIndicator(
                   indicatorType: Indicator.circleStrokeSpin,
-                  colors: [AppColors.primaryLight],
+                  colors: [Color(0xFFB71C1C)],
                 ),
               )),
             )),
         appColorTheme: AppColorTheme(
-            textPrimaryColor: AppColors.newMagentaThemePrimaryColor,
-            textSecondaryColor: AppColors.newMagentaHomeScreenTextColor,
-            textTitleColor: AppColors.newMagentaTextHeaderColor,
-            textSubTitleColor: AppColors.newMagentaSubTextColor,
-            textHintColor: AppColors.newMagentaSubTextColor2,
-            textNeutralColor: AppColors.newMagentaTextColor,
-            textSuccessColor: AppColors.newMagentaSuccessfulTextColor,
-            textFailureColor: AppColors.newMagentaErrorTextColor,
-            textBackgroundColor: AppColors.newMagentaLoginHeaderTextColor,
-            textBlackColor: AppColors.newMagentaBlackColor,
-            iconWarningColor: AppColors.newMagentaWarningColor,
-            textSubtitleLightColor: AppColors.newMagentaSubTextColor3))
+            textPrimaryColor: const Color(0xFF2D3436),
+            textSecondaryColor: const Color(0xFF636E72),
+            textTitleColor: const Color(0xFF2D3436),
+            textSubTitleColor: const Color(0xFFB2BEC3),
+            textHintColor: const Color(0xFFB2BEC3),
+            textNeutralColor: Colors.white,
+            textSuccessColor: const Color(0xFF00B894),
+            textFailureColor: const Color(0xFFD63031),
+            textBackgroundColor: const Color(0xFFF9FAFB),
+            textBlackColor: Colors.black,
+            iconWarningColor: const Color(0xFFFFCC00),
+            textSubtitleLightColor: const Color(0xFFDFE6E9)))
   ],
 );

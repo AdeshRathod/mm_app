@@ -16,6 +16,8 @@ import '../social/interests_received_screen.dart';
 import '../notification/notification_screen.dart';
 import '../notification/notification_binding.dart';
 import '../main/bottom_nav_controller.dart';
+import 'package:app/module/login/login_screen.dart';
+import 'package:app/module/login/login_binding.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -127,11 +129,16 @@ class DashboardState extends State<DashboardScreen> {
 
   Widget _buildModernHeader(
       BuildContext context, DashboardController controller) {
+    bool isGuest = controller.userData.isEmpty;
     String firstName = controller.userData['firstName'] ?? "";
     String lastName = controller.userData['lastName'] ?? "";
     String fullName = (firstName.isNotEmpty || lastName.isNotEmpty)
         ? "$firstName $lastName".trim()
         : controller.userData['name'] ?? "User";
+
+    if (isGuest) {
+      fullName = "Guest Access";
+    }
 
     return Stack(
       clipBehavior: Clip.none,
@@ -140,7 +147,7 @@ class DashboardState extends State<DashboardScreen> {
           height: 200,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.theameColorRed, Color(0xFFD32F2F)],
+              colors: [Color(0xFFB71C1C), Color(0xFFD32F2F)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -159,9 +166,13 @@ class DashboardState extends State<DashboardScreen> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        // Navigate to View Profile screen
-                        Get.to(() => const ProfileDetailScreen(),
-                            binding: ProfileDetailBinding());
+                        if (!isGuest) {
+                          Get.to(() => const ProfileDetailScreen(),
+                              binding: ProfileDetailBinding());
+                        } else {
+                          Get.offAll(() => const LoginScreen(),
+                              binding: LoginBinding());
+                        }
                       },
                       child: Row(
                         children: [
@@ -183,11 +194,11 @@ class DashboardState extends State<DashboardScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Welcome,",
+                                isGuest ? "Welcome," : "Welcome back,",
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.7),
                                   fontSize: 13,
-                                  fontFamily: 'Rubik-normal',
+                                  fontFamily: 'Roboto',
                                 ),
                               ),
                               Text(
@@ -196,7 +207,7 @@ class DashboardState extends State<DashboardScreen> {
                                   color: Colors.white,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  fontFamily: 'Rubik-bold',
+                                  fontFamily: 'Roboto',
                                 ),
                               ),
                             ],
@@ -204,23 +215,43 @@ class DashboardState extends State<DashboardScreen> {
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Get.to(
-                          () => const NotificationScreen(),
-                          binding: NotificationBinding(),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          shape: BoxShape.circle,
+                    if (isGuest)
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.offAll(() => const LoginScreen(),
+                              binding: LoginBinding());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFFB71C1C),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          textStyle: const TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
                         ),
-                        child: const Icon(CupertinoIcons.bell,
-                            color: Colors.white, size: 22),
-                      ),
-                    )
+                        child: const Text("LOGIN"),
+                      )
+                    else
+                      GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            () => const NotificationScreen(),
+                            binding: NotificationBinding(),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(CupertinoIcons.bell,
+                              color: Colors.white, size: 22),
+                        ),
+                      )
                   ],
                 ),
               ],
@@ -248,21 +279,38 @@ class DashboardState extends State<DashboardScreen> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => Get.find<BottomNavController>().changeIndex(1),
+                onTap: () {
+                  if (Get.find<DashboardController>().userData.isEmpty) {
+                    Get.defaultDialog(
+                      title: "Login Required",
+                      middleText: "Please login to search for soulmates.",
+                      textConfirm: "Login",
+                      confirmTextColor: Colors.white,
+                      onConfirm: () {
+                        Get.back();
+                        Get.offAll(() => const LoginScreen(),
+                            binding: LoginBinding());
+                      },
+                      textCancel: "Cancel",
+                    );
+                  } else {
+                    Get.find<BottomNavController>().changeIndex(1);
+                  }
+                },
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
                       const Icon(CupertinoIcons.search,
-                          color: AppColors.theameColorRed, size: 24),
+                          color: Color(0xFFB71C1C), size: 24),
                       const SizedBox(width: 15),
                       Text(
                         "Find your soulmate here.",
                         style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 15,
-                            fontFamily: 'Rubik-normal'),
+                            fontFamily: 'Roboto'),
                       ),
                     ],
                   ),
@@ -276,6 +324,8 @@ class DashboardState extends State<DashboardScreen> {
   }
 
   Widget _buildStatsGrid(DashboardController controller) {
+    if (controller.userData.isEmpty) return const SizedBox.shrink();
+
     final statsData = controller.userStats;
 
     final List<Map<String, dynamic>> stats = [
@@ -290,7 +340,7 @@ class DashboardState extends State<DashboardScreen> {
         'title': 'Interests',
         'count': statsData['interests']?.toString() ?? '0',
         'icon': CupertinoIcons.heart_fill,
-        'color': AppColors.theameColorRed,
+        'color': const Color(0xFFB71C1C),
         'bg': const Color(0xFFFFEBEE)
       },
       {
@@ -372,7 +422,7 @@ class DashboardState extends State<DashboardScreen> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Rubik-bold',
+                      fontFamily: 'Roboto',
                     ),
                   ),
                   Text(
@@ -380,7 +430,7 @@ class DashboardState extends State<DashboardScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
-                      fontFamily: 'Rubik-normal',
+                      fontFamily: 'Roboto',
                     ),
                   ),
                 ],
@@ -404,7 +454,7 @@ class DashboardState extends State<DashboardScreen> {
               fontSize: 19,
               fontWeight: FontWeight.bold,
               color: Color(0xFF2D3436),
-              fontFamily: 'Rubik-bold',
+              fontFamily: 'Roboto',
             ),
           ),
           GestureDetector(
@@ -412,13 +462,13 @@ class DashboardState extends State<DashboardScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.theameColorRed.withOpacity(0.1),
+                color: const Color(0xFFB71C1C).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
                 "View All",
                 style: TextStyle(
-                  color: AppColors.theameColorRed,
+                  color: Color(0xFFB71C1C),
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
@@ -468,8 +518,22 @@ class DashboardState extends State<DashboardScreen> {
 
     return GestureDetector(
         onTap: () {
-          Get.to(const ProfileDetailScreen(),
-              binding: ProfileDetailBinding(), arguments: user['_id']);
+          if (Get.find<DashboardController>().userData.isEmpty) {
+            Get.defaultDialog(
+              title: "Login Required",
+              middleText: "Please login to view profile details.",
+              textConfirm: "Login",
+              confirmTextColor: Colors.white,
+              onConfirm: () {
+                Get.back();
+                Get.offAll(() => const LoginScreen(), binding: LoginBinding());
+              },
+              textCancel: "Cancel",
+            );
+          } else {
+            Get.to(const ProfileDetailScreen(),
+                binding: ProfileDetailBinding(), arguments: user['_id']);
+          }
         },
         child: Container(
           width: 170,

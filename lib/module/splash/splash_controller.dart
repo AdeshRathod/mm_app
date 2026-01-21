@@ -1,7 +1,5 @@
 import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
-import 'package:app/module/login/login_binding.dart';
-import 'package:app/module/login/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/module/onboarding/onboarding_binding.dart';
 import 'package:app/module/onboarding/onboarding_screen.dart';
@@ -43,7 +41,8 @@ class SplashController extends GetxController
       if (token != null && token.isNotEmpty) {
         Get.offAll(() => const BottomNavScreen(), binding: BottomNavBinding());
       } else if (seenOnboarding) {
-        Get.offAll(() => const LoginScreen(), binding: LoginBinding());
+        // Guest Mode - Show profiles before login
+        Get.offAll(() => const BottomNavScreen(), binding: BottomNavBinding());
       } else {
         Get.offAll(() => const OnboardingScreen(),
             binding: OnboardingBinding());

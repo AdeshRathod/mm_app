@@ -49,10 +49,10 @@ class DashboardController extends GetxController {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? userId = prefs.getString('user_id');
 
-      if (userId != null) {
-        Server server = Server();
+      Server server = Server();
 
-        // Parallel fetching
+      if (userId != null) {
+        // Logged in user logic
         // 1. Fetch user profile first
         var user = await server.api.getUser(userId);
         userData.value = user;
@@ -91,6 +91,29 @@ class DashboardController extends GetxController {
           Get.offAll(() => const MembershipScreen(),
               binding: MembershipBinding());
         }
+      } else {
+        // Guest Logic
+        userData.value = {}; // Empty user data
+        userStats.value = {
+          'matches': 0,
+          'interests': 0,
+          'shortlisted': 0,
+          'visitors': 0
+        };
+
+        // Fetch banners and random users for guest
+        // Use forGuest: true to get only visible profiles
+        final results = await Future.wait([
+          server.api.getBanners(),
+          server.api.getFilteredUsers(forGuest: true),
+        ]);
+
+        banners.value = results[0];
+        List<dynamic> users = results[1];
+
+        // Show some random users
+        recommendedUsers.value = users.take(5).toList();
+        newUsers.value = users.skip(5).take(5).toList();
       }
     } catch (e) {
       print("Error fetching dashboard data: $e");

@@ -87,7 +87,9 @@ class ChatScreen extends GetView<ChatController> {
     String time = "";
     if (msg['timestamp'] != null) {
       try {
-        DateTime dt = DateTime.parse(msg['timestamp']).toLocal();
+        String iso = msg['timestamp'];
+        if (!iso.endsWith('Z')) iso += 'Z';
+        DateTime dt = DateTime.parse(iso).toLocal();
         time = DateFormat('hh:mm a').format(dt);
       } catch (e) {}
     }
@@ -126,12 +128,31 @@ class ChatScreen extends GetView<ChatController> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(
-                color: isMe ? Colors.white70 : Colors.grey[500],
-                fontSize: 10,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  time,
+                  style: TextStyle(
+                    color: isMe ? Colors.white70 : Colors.grey[500],
+                    fontSize: 10,
+                  ),
+                ),
+                if (isMe) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    (msg['status'] == 'read' || msg['isRead'] == true)
+                        ? Icons.done_all
+                        : (msg['status'] == 'delivered')
+                            ? Icons.done_all
+                            : Icons.check,
+                    size: 14,
+                    color: (msg['status'] == 'read' || msg['isRead'] == true)
+                        ? Colors.blue[100]
+                        : Colors.white70,
+                  )
+                ]
+              ],
             ),
           ],
         ),

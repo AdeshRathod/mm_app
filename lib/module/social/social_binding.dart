@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SocialController extends GetxController {
   var shortlistedUsers = <dynamic>[].obs;
   var receivedInterests = <dynamic>[].obs;
+  var sentInterests = <dynamic>[].obs;
   var isLoading = true.obs;
 
   @override
@@ -24,10 +25,12 @@ class SocialController extends GetxController {
         final results = await Future.wait([
           server.api.getShortlistedUsers(userId),
           server.api.getReceivedInterests(userId),
+          server.api.getSentInterests(userId),
         ]);
 
         shortlistedUsers.value = results[0];
         receivedInterests.value = results[1];
+        sentInterests.value = results[2];
       }
     } catch (e) {
       print("Error fetching social data: $e");

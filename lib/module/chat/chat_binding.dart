@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:app/core/Server.dart';
@@ -17,10 +18,15 @@ class ChatController extends GetxController {
   String? currentUserId;
   late final SocketService _socketService;
 
+  var isPartnerTyping = false.obs;
+  Timer? _typingTimer;
+  bool _isSelfTyping = false;
+
   @override
   void onInit() {
     super.onInit();
     _socketService = SocketService();
+    messageController.addListener(onTyping);
     _initChat();
   }
 
@@ -34,15 +40,76 @@ class ChatController extends GetxController {
 
       // Listen for incoming messages
       _socketService.messages.listen((msg) {
-        if (msg['senderId'] == targetUserId ||
+        String type = msg['type'] ?? 'text';
+
+        if (type == 'typing') {
+          if (msg['senderId'] == targetUserId) {
+            isPartnerTyping.value = msg['isTyping'] ?? false;
+            // Update status text temporarily if typing
+            if (isPartnerTyping.value) {
+              statusText.value = "Typing...";
+            } else {
+              fetchPartnerStatus(); // Revert to online/last active
+            }
+          }
+        } else if (type == 'status_update') {
+          int index = messages.indexWhere((m) => m['_id'] == msg['messageId']);
+          if (index != -1) {
+            var m = messages[index];
+            m['status'] = msg['status'];
+            m['isRead'] = (msg['status'] == 'read');
+            messages[index] = m;
+            messages.refresh();
+          }
+        } else if (msg['senderId'] == targetUserId ||
             msg['senderId'] == currentUserId) {
-          messages.add(msg);
+          int index = messages.indexWhere((m) => m['_id'] == msg['_id']);
+          if (index == -1) {
+            messages.add(msg);
+          } else {
+            messages[index] = msg;
+            messages.refresh();
+          }
           _scrollToBottom();
+
+          // Mark as read if from partner
+          if (msg['senderId'] == targetUserId) {
+            _markAsRead(msg['_id']);
+          }
         }
       });
 
       fetchHistory();
     }
+  }
+
+  void _markAsRead(String messageId) {
+    _socketService.sendMessage({
+      "type": "status_update",
+      "messageId": messageId,
+      "status": "read",
+      "receiverId": targetUserId
+    });
+  }
+
+  void onTyping() {
+    if (messageController.text.trim().isEmpty) return;
+
+    if (!_isSelfTyping) {
+      _isSelfTyping = true;
+      _sendTypingStatus(true);
+    }
+
+    _typingTimer?.cancel();
+    _typingTimer = Timer(const Duration(seconds: 2), () {
+      _isSelfTyping = false;
+      _sendTypingStatus(false);
+    });
+  }
+
+  void _sendTypingStatus(bool isTyping) {
+    _socketService.sendMessage(
+        {"type": "typing", "receiverId": targetUserId, "isTyping": isTyping});
   }
 
   void fetchHistory() async {
@@ -52,6 +119,13 @@ class ChatController extends GetxController {
           await Server().api.getChatHistory(currentUserId!, targetUserId);
       messages.value = history;
       _scrollToBottom();
+
+      // Mark all unread from partner as read
+      for (var msg in history) {
+        if (msg['senderId'] == targetUserId && !(msg['isRead'] ?? false)) {
+          _markAsRead(msg['_id']);
+        }
+      }
     } catch (e) {
       print("Error fetching chat history: $e");
     } finally {
@@ -70,8 +144,13 @@ class ChatController extends GetxController {
       }
 
       try {
+        // Fix: Python sends UTC isoformat without 'Z'.
+        // Appending 'Z' tells Dart to treat it as UTC.
+        if (!lastActiveIso.endsWith('Z')) {
+          lastActiveIso += 'Z';
+        }
         DateTime lastActive = DateTime.parse(lastActiveIso);
-        Duration diff = DateTime.now().toUtc().difference(lastActive.toUtc());
+        Duration diff = DateTime.now().toUtc().difference(lastActive);
 
         if (diff.inMinutes < 5) {
           statusText.value = "Online";
